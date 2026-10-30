@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>连接 AI · 一人效率实验室</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/connect.js" type="module"></script>
+</head>
+<body>
+  <main class="connect-page">
+    <a href="/" class="text-button">← 返回工作台</a>
+    <section class="panel connect-panel">
+      <p class="eyebrow">仅本机 · WINDOWS 加密保护</p>
+      <h1>AI 草稿配置与状态</h1>
+      <p class="muted form-intro">仅使用已授权的专用密钥，在本机用 Windows 加密保存；不要放进聊天、备份或截图。</p>
+      <p id="connect-configuration" class="form-intro">配置状态读取中，暂不能保存。</p>
+      <div class="connection-summary connect-summary">
+        <span class="mode-badge" id="mode-badge" role="status">AI状态读取中 · 已禁用</span>
+        <p id="connection-message" role="status">正在只读检查本机 AI 保护状态。</p>
+        <p id="connection-times">价格核验到期时间暂未读取。</p>
+        <p id="connection-budget">测试预算读取中。</p>
+        <div class="connection-tools"><button class="btn btn-small btn-secondary" id="refresh-ai-status" type="button">刷新AI状态</button><span>只读、不调用模型；30 秒后需重新检查。</span></div>
+        <p>可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
+      </div>
+      <form id="connect-form" autocomplete="off">
+        <label class="field">毕设专用 API 密钥<input id="api-key" type="password" autocomplete="new-password" placeholder="sk-…" required minlength="23" maxlength="243" spellcheck="false"></label>
+        <p class="tiny muted connect-note">直接从官方平台复制并粘贴。保存配置会向官方余额与模型列表接口验证，不进行付费生成；上方刷新仅读取本机状态。</p>
+        <button id="connect-submit" class="btn btn-primary" type="submit" disabled>验证并加密保存配置</button>
+      </form>
+      <p id="connect-status" role="status" class="connect-note"></p>
+      <p class="tiny muted connect-note">AI 起草每次请求预留 ¥0.05，一轮最多 ¥0.10；失败也计入预留，不自动重试、不充值。计划仍为模板，检查为规则，指标为手工录入。</p>
+      <p class="tiny muted connect-note">本页仅通过本机服务使用。官方平台：<a class="text-button" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">管理专用密钥</a>。已有本机配置时无需新建密钥。</p>
+    </section>
+  </main>
+</body>
+</html>

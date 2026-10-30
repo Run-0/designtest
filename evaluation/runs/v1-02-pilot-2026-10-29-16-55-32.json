@@ -1,0 +1,66 @@
+{
+  "runId": "v1-02-pilot-2026-10-29-16-55-32",
+  "executedAt": "2026-10-29T16:55:32.744Z",
+  "scope": "开发集小规模试跑，不是最终对照实验，也不能用于泛化结论",
+  "dataset": "test/fixtures/content-cases.json",
+  "caseIds": [
+    "v1-01-04"
+  ],
+  "model": "deepseek-flash",
+  "budgetBefore": {
+    "limitCny": 3,
+    "reservedCny": 1.55,
+    "remainingCny": 1.45,
+    "attempts": 31
+  },
+  "availabilityBefore": {
+    "code": "ready",
+    "canGenerateDraft": true,
+    "message": "本机保护允许尝试 AI 起草；未实时验证远端网络、密钥或赠送余额，实际调用仍可能失败。",
+    "checkedAt": "2026-10-29T16:55:32.736Z",
+    "priceCheckedUntil": "2026-11-05T16:00:00.000Z",
+    "remoteChecked": false
+  },
+  "plannedMaxRequests": 2,
+  "scorer": "assistant（实现者自评，不能替代独立评分）",
+  "cases": [
+    {
+      "caseId": "v1-01-04",
+      "category": "conflicting_materials",
+      "expectedOutcome": "needs_clarification",
+      "task": {
+        "title": "断网通勤时能否新建待办卡片",
+        "angle": "核对两份合成资料中离线新建卡片的说法。两份均无日期、版本、来源权威或设备差异依据，不得按排列顺序决定新旧；关键事实冲突时先指出双方原意并请求澄清，不写确定性教程。"
+      },
+      "error": "AI 认为资料之间存在冲突、需要先澄清：两份合成资料对关键事实给出相反说法：甲称离线可以创建新卡片，乙称离线不能创建新卡片。两份资料均未提供日期、版本、设备条件或作者权威，甲乙只是随机标签，不代表新旧或优先级，因此无法据此裁决哪一说法成立。在澄清之前不宜写成确定性建议或教程。\n还需要：两份资料分别对应的工具版本号或发布日期；说明差异是否源于设备类型、客户端或授权状态的信息；能显示离线新建卡片实际行为的官方说明或截图；能裁决甲、乙说法冲突的权威来源或测试记录。\n这是受控停止，不是网络失败，也没有生成草稿；补充或澄清资料后可再次尝试。",
+      "errorCode": "needs_clarification",
+      "httpStatus": 422,
+      "body": null,
+      "sourceIds": [],
+      "cautions": [],
+      "toolTrace": null,
+      "aiQuery": null,
+      "querySource": null,
+      "itemId": "65cb09a6-9147-481f-90df-b1f67db39137",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:55:32.764Z",
+        "finishedAt": "2026-10-29T16:55:37.949Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.65,
+        "remainingCny": 1.35,
+        "attempts": 33
+      }
+    }
+  ],
+  "budgetAfter": {
+    "limitCny": 3,
+    "reservedCny": 1.65,
+    "remainingCny": 1.35,
+    "attempts": 33
+  },
+  "requestsTotal": 2,
+  "assessment": "待逐条人工核对；未把夹具结构通过或文案可读当成通过"
+}

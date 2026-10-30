@@ -1,0 +1,22 @@
+{
+  "testRun": "v2-idea-feasibility-pilot",
+  "timestamp": "2026-10-30T12:28:08+08:00",
+  "inputIdea": "想聊聊为什么打卡软件越用越累，但不知道偏不偏离定位或缺什么资料",
+  "result": {
+    "fit": "recommended",
+    "fitReason": "选题直击大学生和职场新人使用打卡软件的疲惫感，与定位中解决具体问题、分享工具用法高度契合，且能提供可操作的方法。",
+    "evidenceEvaluation": "本地资料是自编演示流程，无真实用户反馈或外部研究，缺乏打卡软件越用越累的具体原因和改善方法的实际证据。",
+    "recommendedTitle": "打卡软件越用越累？试试把待办分成三类",
+    "recommendedAngle": "从打卡软件让人疲惫的现象切入，分享一个自用的分类方法：把待办分成必须完成、可以推进、暂缓处理，并补上下一步动作；说明这是个人演示，效果因人而异，不夸大节省时间。",
+    "estimatedMinutes": 45,
+    "matchedSourceIds": [
+      "fd3acc07-b8a6-458b-8412-47654d66193c"
+    ]
+  },
+  "usage": {
+    "promptTokens": 457,
+    "completionTokens": 212,
+    "totalTokens": 669
+  },
+  "requestId": "7e16082f-e836-4cf8-abbb-c88633bdf9ae"
+}

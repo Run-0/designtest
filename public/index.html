@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f1">
+  <meta name="description" content="一人效率实验室：面向独立内容创作者的本地内容运营工作台。">
+  <title>一人效率实验室 · SOLO STUDIO</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l5-1L21 7a2.8 2.8 0 0 0-4-4L5 15l-1 5Z"/><path d="M13 20h8"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6v15M12 6C9 3 5 3 2 4v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-3-1-7-1-10 2Z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3v17h17M9 15v-5m5 5V6m5 9v-7"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h9a4 4 0 0 1 0 8H8a4 4 0 0 0 0 8h4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 13 4-4m-6 1-3 3a4.2 4.2 0 0 0 6 6l3-3m-4-8 3-3a4.2 4.2 0 0 1 6 6l-3 3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></symbol>
+  </svg>
+
+  <aside class="sidebar" aria-label="工作空间导航">
+    <a class="brand" href="#overview" data-page="overview" aria-label="一人效率实验室，总览">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span><strong>一人效率实验室</strong><small>SOLO STUDIO</small></span>
+    </a>
+    <div class="workspace-label"><span class="workspace-avatar">一</span><span>我的运营空间<small>独立创作 · 轻量运转</small></span><span class="local-dot" aria-label="本地工作空间"></span></div>
+    <p class="nav-caption">工作台</p>
+    <nav class="nav-list">
+      <a href="#overview" data-page="overview" class="nav-link active" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span>总览</span><span class="nav-active-dot" aria-hidden="true"></span></a>
+      <a href="#studio" data-page="studio" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><span>内容工作台</span></a>
+      <a href="#sources" data-page="sources" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>参考资料</span></a>
+      <a href="#report" data-page="report" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg><span>数据复盘</span></a>
+      <a href="#roadmap" data-page="roadmap" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-route"/></svg><span>毕设路线</span></a>
+      <a href="/connect.html" class="nav-link" data-connect><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg><span>AI 草稿连接</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="small-note"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><strong>小步推进，也是一种效率。</strong><p>先完成一条真实内容，<br>再让下一条更好。</p></div>
+      <a href="/api/export" class="backup-link" download><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>导出完整备份 <span>JSON</span></a>
+      <div class="sidebar-foot"><span class="local-dot"></span>本地第一版 <span>·</span> 数据保存在服务端本地</div>
+    </div>
+  </aside>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="breadcrumb">一人运营工作室 <span>/</span> <strong id="breadcrumb-current">总览</strong></div>
+      <div class="topbar-right">
+        <span class="mode-badge" id="mode-badge" role="status">AI状态读取中 · 已禁用</span>
+        <button class="btn btn-secondary btn-small btn-settings" id="open-settings-btn" type="button" aria-label="打开全局设置">
+          <svg class="icon" aria-hidden="true"><use href="#i-route"/></svg>
+          <span>⚙️ 设置</span>
+        </button>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <details class="scope-notice" id="scope-notice-details">
+        <summary class="scope-notice-summary">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <span id="connection-message" role="status">正在只读检查本机 AI 保护状态。</span>
+          <span class="scope-toggle-hint">安全详情 ▾</span>
+        </summary>
+        <div class="connection-summary">
+          <p id="connection-times">价格核验到期时间暂未读取。</p>
+          <p id="connection-budget">测试预算读取中。</p>
+          <div class="connection-tools">
+            <button class="btn btn-small btn-secondary" id="refresh-ai-status" type="button">刷新AI状态</button>
+            <span>只读、不调用模型；30 秒后需重新检查。</span>
+          </div>
+          <p>可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
+          <p id="scope-notice-text">计划为 5 个内置模板，检查为程序规则，复盘为手工指标报告；不爬取、不接平台账号、不自动发布。</p>
+        </div>
+      </details>
+      <div id="boot-state" class="boot-state" role="status"><span class="loader" aria-hidden="true"></span><h1>正在打开你的工作空间</h1><p>读取本地内容与资料，不会连接外部平台。</p></div>
+      <div id="boot-error" class="panel boot-error" hidden role="alert"><h1>暂时没有连接到本地服务</h1><p id="boot-error-message"></p><button class="btn btn-primary" id="retry-state" type="button">重新连接</button></div>
+      <noscript><div class="panel">请启用浏览器 JavaScript 后使用工作台。此页面需通过本地 Node 服务访问。</div></noscript>
+      <div id="pages" hidden>
+        <section id="page-overview" class="page" aria-labelledby="overview-title">
+          <div class="page-heading"><div><p class="eyebrow" id="today-label">今天，也专注一点</p><h1 id="overview-title" tabindex="-1">你好，独立创作者<span class="heading-dot">。</span></h1><p class="page-subtitle">少一点来回切换，多一点有计划的创作。</p></div><button class="btn btn-primary" type="button" data-go="studio"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>制定内容计划</button></div>
+          <div class="overview-intro">
+            <div class="welcome-card">
+              <div class="welcome-copy"><span class="tiny-label">一个人的公司，也可以有序运转</span><h2>让灵感有去处，<br>让每一份投入有回响。</h2><p>从选题到复盘，把内容运营变成<br class="desktop-break">一条看得见、能完成的小流程。</p><div class="welcome-tags"><span id="overview-platform">小红书图文</span><span>资料辅助</span><span>人工把关</span></div></div>
+              <div class="workflow-art" aria-hidden="true"><div class="art-orbit"></div><div class="art-paper"><div class="art-paper-top"><span class="art-mini-icon">↗</span><span>本周创作清单</span></div><div class="art-line"><b>01</b><span>整理一个好想法</span><i></i></div><div class="art-line"><b>02</b><span>写一份有用的内容</span><i></i></div><div class="art-line"><b>03</b><span>记录，复盘，再出发</span><i></i></div><div class="art-progress"><span></span></div></div><div class="art-stamp"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>保持创造</span></div></div>
+            </div>
+            <section class="panel budget-card" aria-labelledby="budget-title"><div class="section-label"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><h2 id="budget-title">每周时间预算</h2></div><div class="budget-number"><strong id="budget-hours">—</strong><span>小时 / 周</span></div><div class="budget-track" aria-hidden="true"><span id="budget-fill"></span></div><p class="budget-description" id="budget-description"></p><p class="muted tiny">按未发布内容预计用时估算，<br>不是实际工时记录。</p><button class="text-button" id="edit-profile-shortcut" type="button">调整我的工作底稿 <span aria-hidden="true">↗</span></button></section>
+          </div>
+          <div class="stats-grid" id="overview-stats" aria-label="真实内容数量"></div>
+          <section class="section-block" aria-labelledby="getting-started-title"><div class="section-heading"><h2 id="getting-started-title">从这里开始</h2><span class="muted tiny">不必一次做完，先迈出一步</span></div><div class="steps-grid"><button class="step-card" data-go="studio" type="button"><span class="step-number">01</span><span><strong>创建内容计划</strong><small>按时间预算，安排可完成的选题</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="step-card" data-go="studio" type="button"><span class="step-number">02</span><span><strong>完善草稿，人工审核</strong><small>补充资料、检查规则、核实事实</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="step-card" data-go="report" type="button"><span class="step-number">03</span><span><strong>登记发布，记录反馈</strong><small>自行发布后，在这里沉淀真实数据</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></div></section>
+          <div class="overview-lower"><section class="panel" aria-labelledby="recent-title"><div class="panel-heading"><h2 id="recent-title">近期内容</h2><button class="text-button" type="button" data-go="studio">查看全部 <span aria-hidden="true">→</span></button></div><div id="recent-items"></div></section><section class="panel" aria-labelledby="events-title"><div class="panel-heading"><h2 id="events-title">工作记录</h2><span class="mini-tag">真实操作</span></div><ol id="recent-events" class="event-list"></ol></section></div>
+          <details class="panel profile-panel" id="profile-details"><summary><span><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><strong>账号工作底稿</strong><span class="muted" id="profile-summary">你的创作方向与每周预算</span></span><span class="summary-action">编辑设置 <span aria-hidden="true">⌄</span></span></summary><div class="details-body"><p class="muted form-intro">默认假设：小红书效率工具图文账号，面向独立内容创作者。它只是起点，你可以按真实情况调整；不会连接平台账号。</p><form id="profile-form" data-track><div class="form-grid"><label class="field">工作空间 / 账号名称<input name="name" required maxlength="80" autocomplete="off"></label><label class="field">内容平台<input name="platform" required maxlength="100" placeholder="例如：小红书（图文）"></label><label class="field">目标受众<input name="audience" required maxlength="300" placeholder="例如：希望提升效率的独立创作者"></label><label class="field">表达语气<input name="tone" required maxlength="300" placeholder="例如：真诚、简洁、不夸大效果"></label><label class="field field-wide">内容定位<textarea name="positioning" required rows="2" maxlength="600"></textarea></label><label class="field">每周可投入时间（小时）<input name="weeklyHours" type="number" min="1" max="40" step="1" required inputmode="numeric"><small>一条计划预计 40 分钟，优先量力而行。</small></label><label class="field">当前目标<input name="goal" required maxlength="600" placeholder="例如：每周完成 3 篇有资料依据的内容"></label></div><p class="form-error" id="profile-error" role="alert" hidden></p><div class="form-footer"><span class="muted tiny">这是本地工作底稿，不是平台资料。</span><button class="btn btn-primary" type="submit">保存工作底稿</button></div></form></div></details>
+        </section>
+
+        <section id="page-studio" class="page" hidden aria-labelledby="studio-title">
+          <div class="studio-header">
+            <div class="studio-header-title">
+              <h1 id="studio-title" tabindex="-1">内容运营工作台</h1>
+              <span class="studio-tag">独立创作 · 选题 · 写作 · 复盘</span>
+            </div>
+            <span class="page-chip"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg>人工把关模式</span>
+          </div>
+
+          <div class="studio-workbench">
+            <!-- Column 1: Inspiration & Planning & Queue -->
+            <aside class="workbench-col col-planning">
+              <!-- Card 1: Inspiration Feasibility Diagnoser -->
+              <section class="panel idea-card" aria-labelledby="idea-diagnose-title">
+                <div class="card-head">
+                  <h2 id="idea-diagnose-title"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 灵感可行性诊断</h2>
+                </div>
+                <p class="muted tiny">随手记下突发想法，智能体评估契合度与资料缺口。</p>
+                <div class="idea-box">
+                  <textarea id="idea-input" rows="2" maxlength="300" placeholder="例如：想聊聊为什么打卡软件越用越累，但不知道偏不偏离定位或缺什么资料..."></textarea>
+                  <button class="btn btn-secondary btn-small full-width" id="diagnose-idea-btn" type="button">
+                    <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 诊断选题可行性
+                  </button>
+                </div>
+                <div id="idea-diagnosis-result" class="idea-result" hidden>
+                  <div class="idea-result-header">
+                    <span id="idea-fit-badge" class="status-pill status-approved">契合推荐</span>
+                    <span id="idea-est-time" class="muted tiny">预计 40 分钟</span>
+                  </div>
+                  <p id="idea-fit-reason" class="idea-detail-text"></p>
+                  <p id="idea-evidence-eval" class="idea-detail-text muted tiny"></p>
+                  <div class="idea-recommended-box">
+                    <strong id="idea-rec-title"></strong>
+                    <p id="idea-rec-angle" class="tiny muted"></p>
+                  </div>
+                  <button class="btn btn-primary btn-small full-width" id="adopt-diagnosed-idea-btn" type="button">
+                    ➕ 采纳并加入队列
+                  </button>
+                </div>
+              </section>
+
+              <!-- Card 2: AI Plan & Template Plan -->
+              <section class="panel plan-card" aria-labelledby="plan-section-title">
+                <form id="plan-form">
+                  <div class="plan-card-head">
+                    <h2 id="plan-section-title"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> 选题规划</h2>
+                    <p class="plan-budget-text" id="plan-budget">工时预算读取中...</p>
+                  </div>
+                  <div class="plan-controls-row">
+                    <div class="plan-count-wrap">
+                      <label class="sr-only" for="plan-count">计划数量</label>
+                      <select id="plan-count" name="count">
+                        <option value="1">1 条</option>
+                        <option value="2">2 条</option>
+                        <option value="3" selected>3 条</option>
+                        <option value="4">4 条</option>
+                        <option value="5">5 条</option>
+                      </select>
+                    </div>
+                    <button class="btn btn-primary btn-small flex-1" id="ai-plan-btn" type="button">
+                      <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 规划选题
+                    </button>
+                    <button class="btn btn-secondary btn-small" id="template-plan-btn" type="submit">
+                      + 模板
+                    </button>
+                  </div>
+                  <p class="form-error full-width" id="plan-error" role="alert" hidden></p>
+                </form>
+
+                <div id="ai-plan-panel" class="ai-plan-panel" hidden>
+                  <div class="panel-heading">
+                    <div>
+                      <h2>AI 规划建议（受工时与资料约束）</h2>
+                      <p class="muted tiny" id="ai-plan-summary">智能体结合受众与资料生成了候选选题：</p>
+                    </div>
+                    <button class="text-button" id="ai-plan-close" type="button">收起 ✕</button>
+                  </div>
+                  <div id="ai-plan-candidates" class="ai-candidates-grid"></div>
+                  <div class="ai-plan-footer">
+                    <span id="ai-plan-total-time" class="muted tiny">已勾选耗时：0 分钟</span>
+                    <button class="btn btn-primary btn-small" id="ai-plan-confirm" type="button" disabled>确认采纳</button>
+                  </div>
+                  <p class="form-error full-width" id="ai-plan-error" role="alert" hidden></p>
+                </div>
+              </section>
+
+              <!-- Card 3: Topic Task Queue -->
+              <section class="panel queue-card" aria-labelledby="queue-section-title">
+                <div class="queue-heading">
+                  <h2 id="queue-section-title">任务队列</h2>
+                  <div class="filter-bar filter-bar-compact" id="status-filters" role="group" aria-label="按内容状态筛选"></div>
+                </div>
+                <div class="content-list content-list-compact" id="content-list" aria-label="内容任务队列"></div>
+              </section>
+            </aside>
+
+            <!-- Column 2: Focus Writing & Quality Check -->
+            <div class="workbench-col col-editor">
+              <section class="panel editor-panel" id="editor-panel" aria-label="内容编辑与检查">
+                <div id="editor-empty" class="empty-state editor-empty">
+                  <span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg></span>
+                  <h2>给一个想法，留出专注空间</h2>
+                  <p>从左侧任务队列中选择一篇内容开始编辑，或者输入突发灵感让 AI 智能体为你规划选题。</p>
+                </div>
+
+                <div id="editor-content" hidden>
+                  <div class="editor-topline">
+                    <div class="editor-status-wrap">
+                      <span id="editor-status"></span>
+                      <span class="muted tiny" id="editor-meta"></span>
+                    </div>
+                    <span class="save-indicator" id="save-indicator" role="status">已保存</span>
+                  </div>
+
+                  <p class="editor-angle-banner" id="editor-angle"></p>
+                  <div class="editor-flow" aria-label="内容处理步骤">
+                    <span data-flow="draft">1 起草</span><i aria-hidden="true">→</i>
+                    <span data-flow="review">2 规则检查</span><i aria-hidden="true">→</i>
+                    <span data-flow="approve">3 人工确认</span><i aria-hidden="true">→</i>
+                    <span data-flow="publish">4 发布登记</span>
+                  </div>
+
+                  <form id="editor-form">
+                    <div class="field-title-wrap">
+                      <label class="sr-only" for="editor-title">内容标题</label>
+                      <input id="editor-title" name="title" required maxlength="200" placeholder="内容标题...">
+                    </div>
+                    <div class="field-body-wrap">
+                      <div class="body-toolbar">
+                        <span class="body-label">正文草稿</span>
+                        <span id="body-count" class="word-count-pill count-short">0 字符</span>
+                      </div>
+                      <textarea id="editor-body" name="body" required rows="14" maxlength="20000" placeholder="点击「AI 资料起草」或「生成模板草稿」开始写作..."></textarea>
+                    </div>
+
+                    <div class="editor-buttons">
+                      <button class="btn btn-primary" id="save-draft" type="submit">💾 保存修改</button>
+                      <button class="btn btn-secondary" id="ai-draft" type="button" disabled aria-describedby="ai-draft-hint">
+                        <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 🤖 AI 资料起草
+                      </button>
+                      <button class="btn btn-secondary" id="generate-draft" type="button">
+                        <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> <span>生成模板草稿</span>
+                      </button>
+                      <button class="btn btn-secondary" id="copy-draft-btn" type="button">
+                        📋 一键复制正文
+                      </button>
+                      <button class="btn btn-quiet" id="export-draft" type="button">
+                        <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> <span>导出 TXT</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  <p class="form-error" id="editor-error" role="alert" hidden></p>
+                  <p class="tiny muted" id="editor-help">修改标题或正文后，已有检查与人工确认会失效，需要重新检查。</p>
+                  <p class="tiny muted draft-note" id="ai-draft-hint">AI 草稿连接状态读取中。</p>
+                  <a href="/connect.html" class="text-button" id="editor-connect" data-connect hidden>前往配置 AI 草稿连接 →</a>
+
+                  <section id="editor-ai" class="ai-details" aria-label="AI 草稿来源与工具摘要" hidden></section>
+
+                  <section class="review-section" aria-labelledby="review-title">
+                    <div class="section-heading">
+                      <h3 id="review-title"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> 发布前规则检查</h3>
+                      <button class="btn btn-small btn-secondary" id="review-draft" type="button">运行规则检查</button>
+                    </div>
+                    <p class="tiny muted">程序检查内置规则（标题、字数、敏感承诺等），不替代人工事实判断。</p>
+                    <div id="review-results"></div>
+                    <form id="approve-form">
+                      <label class="checkbox-field">
+                        <input type="checkbox" id="human-confirm">
+                        <span>我已人工核实当前版本的内容及引用资料，尤其是检查提醒项。</span>
+                      </label>
+                      <button class="btn btn-secondary" id="approve-draft" type="submit">人工确认可发布</button>
+                      <p class="tiny muted" id="approve-hint"></p>
+                    </form>
+                  </section>
+
+                  <section class="publish-section" aria-labelledby="publish-title">
+                    <h3 id="publish-title"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg> 手动发布登记</h3>
+                    <p class="tiny muted">自行在小红书等平台发布后，在此登记网址以进入复盘阶段。</p>
+                    <form id="publish-form" data-track>
+                      <label class="field">已发布内容的网址
+                        <input id="published-url" name="url" type="url" placeholder="https://…" required autocomplete="off">
+                      </label>
+                      <button class="btn btn-primary" id="publish-item" type="submit">登记已发布网址</button>
+                    </form>
+                    <div id="published-info" hidden></div>
+                  </section>
+                </div>
+              </section>
+            </div>
+
+            <!-- Column 3: Context Drawer (References & Fast Feedback) -->
+            <aside class="workbench-col col-context">
+              <div class="context-drawer-card panel">
+                <div class="drawer-tabs">
+                  <button class="drawer-tab-btn active" id="drawer-tab-btn-sources" type="button">
+                    <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> 资料库 (<span id="drawer-source-count">0</span>)
+                  </button>
+                  <button class="drawer-tab-btn" id="drawer-tab-btn-report" type="button">
+                    <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg> 快速复盘
+                  </button>
+                </div>
+
+                <div id="drawer-pane-sources" class="drawer-pane">
+                  <div class="drawer-subheading">
+                    <h3>📌 本文引用资料 (<span id="reference-count">0</span>)</h3>
+                  </div>
+                  <div id="editor-sources" class="editor-sources-preview"></div>
+
+                  <div class="drawer-subheading">
+                    <h3>📚 全部参考资料</h3>
+                    <button class="btn btn-small btn-secondary" id="drawer-add-source-toggle-btn" type="button">+ 添加</button>
+                  </div>
+                  <div id="drawer-add-source-box" class="drawer-add-source-box" hidden>
+                    <form id="drawer-source-form">
+                      <input name="title" required maxlength="200" placeholder="资料标题...">
+                      <textarea name="content" required rows="3" maxlength="20000" placeholder="可核实的文字要点与实测记录..."></textarea>
+                      <input name="url" type="url" placeholder="来源网址（选填 https://...）">
+                      <div class="drawer-form-actions">
+                        <button class="btn btn-small btn-quiet" id="cancel-drawer-source-btn" type="button">取消</button>
+                        <button class="btn btn-small btn-primary" type="submit">保存资料</button>
+                      </div>
+                    </form>
+                  </div>
+                  <div id="drawer-all-sources-list" class="drawer-source-list"></div>
+                </div>
+
+                <div id="drawer-pane-report" class="drawer-pane" hidden>
+                  <div class="drawer-subheading">
+                    <h3>📊 快速数据复盘</h3>
+                  </div>
+                  <p class="muted tiny">自行发布后，在下方登记实际累计互动数据：</p>
+                  <div id="drawer-quick-metrics" class="drawer-quick-metrics-box">
+                    <p class="tiny muted" id="drawer-no-publish-hint">当前草稿尚未登记发布。可在发布后在此记录点赞与评论。</p>
+                  </div>
+                  <button class="btn btn-secondary btn-small full-width" type="button" data-go="report">
+                    前往完整数据复盘页 →
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="page-sources" class="page" hidden aria-labelledby="sources-title">
+          <div class="page-heading"><div><p class="eyebrow">让内容有依据，而不只是听起来对</p><h1 id="sources-title" tabindex="-1">参考资料<span class="heading-dot">。</span></h1><p class="page-subtitle">手动收集可信内容，保留来源，供草稿参考；固定选取资料不是语义检索。</p></div><span class="page-chip" id="source-total">0 份资料</span></div>
+          <div class="sources-layout"><section aria-label="已有参考资料"><div class="section-heading"><h2>我的资料库</h2><span class="muted tiny">内置资料也需要你判断适用性</span></div><div id="source-list" class="source-list"></div></section><section class="panel source-form-panel" aria-labelledby="add-source-title"><div class="panel-heading"><h2 id="add-source-title">添加一份资料</h2><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></div><p class="muted form-intro">粘贴原文要点、产品说明或自己的实测记录。这里只保存你输入的文字，不会自动读取网址。</p><form id="source-form" data-track><label class="field">资料标题<input name="title" required maxlength="200" placeholder="例如：某款工具的官方功能说明"></label><label class="field">资料正文<textarea name="content" required rows="8" maxlength="20000" placeholder="写下可核实的信息，并注明适用条件与时间。避免粘贴个人隐私或机密。"></textarea></label><label class="field">来源网址 <span class="optional">选填</span><input name="url" type="url" placeholder="https://…" autocomplete="off"></label><p class="tiny muted">自己的经验记录可以不填网址。资料内容仍需人工核实，不等于已完成检索验证。</p><p class="form-error" id="source-error" role="alert" hidden></p><button class="btn btn-primary full-width" type="submit">保存参考资料</button></form></section></div>
+        </section>
+
+        <section id="page-report" class="page" hidden aria-labelledby="report-title">
+          <div class="page-heading"><div><p class="eyebrow">用真实反馈，决定下一小步</p><h1 id="report-title" tabindex="-1">数据复盘<span class="heading-dot">。</span></h1><p class="page-subtitle">手动录入真实指标，生成规则报告；不是 AI 复盘，也不读取平台账号。</p></div><button class="btn btn-secondary" id="refresh-report" type="button"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>刷新复盘</button></div>
+          <div class="report-notice"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p><strong>互动率 =（点赞 + 评论 + 收藏）÷ 浏览。</strong>这是互动次数的比率，不是独立人数或转化率；同一人可多次互动，因此可能超过 100%。浏览为 0 时不计算。</p></div>
+          <div id="report-loading" class="inline-loading" role="status" hidden>正在读取手动录入的数据…</div><p class="form-error" id="report-error" role="alert" hidden></p>
+          <div id="report-results"><div id="report-stats" class="stats-grid report-stats"></div><div class="report-insights"><section class="panel" aria-labelledby="insights-title"><div class="panel-heading"><h2 id="insights-title">这次数据告诉我们什么</h2><span class="mini-tag">规则建议</span></div><p id="sample-note" class="sample-note"></p><ul id="recommendations" class="recommendation-list"></ul><div id="best-item" class="best-item" hidden></div></section><section class="panel metrics-panel" aria-labelledby="metrics-title"><div class="panel-heading"><h2 id="metrics-title">录入真实数据</h2><span class="mini-tag">手工填写</span></div><p class="muted form-intro">请在平台查看实际累计数据后填写；再次保存会替换上次记录，不会相加。</p><form id="metrics-form" data-track><label class="field">已登记发布的内容<select name="itemId" id="metrics-item" required></select></label><div class="form-grid metrics-grid"><label class="field">浏览量<input name="views" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际浏览次数"></label><label class="field">点赞数<input name="likes" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际点赞次数"></label><label class="field">评论数<input name="comments" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际评论条数"></label><label class="field">收藏数<input name="saves" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际收藏次数"></label></div><p id="metrics-last-recorded" class="tiny muted"></p><p class="form-error" id="metrics-error" role="alert" hidden></p><button class="btn btn-primary full-width" id="save-metrics" type="submit">保存实际数据</button></form><p class="muted" id="metrics-empty" hidden>还没有登记发布的内容。请先在内容工作台完成检查、人工确认与发布网址登记。</p></section></div><section class="panel report-table-panel" aria-labelledby="report-table-title"><div class="panel-heading"><h2 id="report-table-title">逐条内容表现</h2><span class="muted tiny">只展示已录入数据的内容</span></div><div class="table-scroll" tabindex="0" role="region" aria-label="逐条内容表现表，可横向滚动"><table><caption class="sr-only">手工录入的内容数据与按互动次数计算的比率</caption><thead><tr><th scope="col">内容</th><th scope="col">浏览</th><th scope="col">点赞</th><th scope="col">评论</th><th scope="col">收藏</th><th scope="col">互动率</th></tr></thead><tbody id="report-rows"></tbody></table></div></section></div>
+        </section>
+
+        <section id="page-roadmap" class="page" hidden aria-labelledby="roadmap-title">
+          <div class="page-heading"><div><p class="eyebrow">把能演示的第一版，做成有证据的毕业设计</p><h1 id="roadmap-title" tabindex="-1">毕设路线<span class="heading-dot">。</span></h1><p class="page-subtitle">先跑通小闭环，再接入模型，最后用实验说明价值。</p></div><span class="page-chip">8 周 · 小步验收</span></div>
+          <section class="panel thesis-brief"><span class="tiny-label">毕业设计题目</span><h2>面向一人公司的 AI 运营智能体设计与实现</h2><div class="thesis-facts"><p><strong>服务谁</strong>独立内容创作者，一个人完成选题、写作与复盘。</p><p><strong>默认场景</strong>小红书效率工具图文账号；这是助手的可调整假设，不是已经确定的业务结论。</p><p><strong>核心边界</strong>人掌握发布与事实判断，不接发布平台账号、不自动发布、不爬取；不声称平台授权，不保证涨粉。</p></div></section>
+          <div class="capability-grid"><section class="panel capability-card"><span class="capability-label is-ready">当前第一版 · 已有本地流程</span><h2>本地流程与可配置的 AI 草稿</h2><ul class="plain-list"><li>工作底稿、手动资料与 5 个内置选题模板</li><li>免费模板起草；AI 草稿需配置并逐次确认</li><li>版本编辑、规则检查与人工确认</li><li>发布网址登记、手工指标规则复盘与本地备份</li></ul><p class="tiny muted">AI草稿连接状态见顶部；完整检索评测与自主规划仍未实现。配置完成不代表每次调用成功，也不代表完整智能体。</p></section><section class="panel capability-card"><span class="capability-label is-next">后续毕业设计 · 待实现与评测</span><h2>完整检索与自主规划，需要验证</h2><ul class="plain-list"><li>模型质量、失败处理与预算控制评测</li><li>语义资料检索、引用追溯及检索效果评测</li><li>自主规划与更完整的受约束工具流程</li><li>对照实验、真实费用核对与论文证据</li></ul><p class="tiny muted">目前没有模型事实核查、自动抓取、平台连接或效果承诺。</p></section></div>
+          <section class="section-block" aria-labelledby="weeks-title"><div class="section-heading"><h2 id="weeks-title">两个月，每周只推进一个重点</h2><span class="muted tiny">建议安排，可按实际进度调整</span></div><ol class="week-grid"><li><span>第 01 周</span><h3>界定问题</h3><p>确定用户与业务场景，整理需求和验收清单。</p></li><li><span>第 02 周</span><h3>跑通本地闭环</h3><p>用真实资料完成一条内容，验证预算与人工节点。</p></li><li><span>第 03 周</span><h3>接入真实模型</h3><p>服务端配置模型，记录调用、错误与实际费用。</p></li><li><span>第 04 周</span><h3>补齐资料检索</h3><p>实现检索与引用，准备带依据的测试问题。</p></li><li><span>第 05 周</span><h3>完善受控流程</h3><p>约束工具调用、状态流转、版本检查和异常恢复。</p></li><li><span>第 06 周</span><h3>运行对照实验</h3><p>固定任务与评分规则，对比三种工作方式。</p></li><li><span>第 07 周</span><h3>分析与写作</h3><p>整理真实日志、失败案例、架构与实验结果。</p></li><li><span>第 08 周</span><h3>测试与答辩</h3><p>修复问题，备份数据，准备可重复的现场演示。</p></li></ol></section>
+          <section class="panel experiment-panel" aria-labelledby="experiment-title"><div class="panel-heading"><h2 id="experiment-title">怎么证明它有用？做一组公平对照</h2><span class="mini-tag">实验设计，不是现有结果</span></div><p class="muted">用同一组内容任务、同一模型与参数，统一时间边界和人工评分标准；多次试验，保留原始输出与人工修改记录。</p><div class="experiment-grid"><div><span class="experiment-letter">A</span><h3>普通提示</h3><p>只提供任务与账号要求，直接向模型提问。</p></div><div><span class="experiment-letter">B</span><h3>资料辅助</h3><p>在相同要求上提供参考资料，观察引用与事实表现。</p></div><div><span class="experiment-letter">C</span><h3>完整工具流程</h3><p>加入预算计划、检索、检查与人工确认，比较完整任务成本。</p></div></div><div class="experiment-metrics"><div><strong>事实错误</strong><span>人工对照来源，统计错误条数及其占比。</span></div><div><strong>约束满足率</strong><span>满足的预设要求数 ÷ 要求总数。</span></div><div><strong>人工耗时</strong><span>从开始任务到可发布内容的实际人工分钟数。</span></div><div><strong>调用成本</strong><span>记录真实模型用量与费用，不虚构零成本。</span></div></div><p class="method-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>当前本地流程与单次 AI 草稿结果不能替代上述实验。发布互动数据用于运营观察，不足以证明 AI 带来增长；先积累样本，再谨慎下结论。</p></section>
+        </section>
+      </div>
+      <footer class="main-footer"><span>一人效率实验室 <span aria-hidden="true">/</span> 专注创作，保留判断。</span><a class="footer-backup" href="/api/export" download>导出 JSON 备份</a><span>本地工作台 · AI 连接状态见顶部</span></footer>
+    </main>
+  </div>
+
+  <div id="settings-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="settings-title">⚙️ 全局设置</h2>
+        <button class="modal-close" id="close-settings-btn" type="button" aria-label="关闭设置">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" id="modal-tab-profile" type="button">👤 账号人设底稿</button>
+        <button class="modal-tab-btn" id="modal-tab-ai" type="button">🤖 AI 模型与安全密件箱 🔒</button>
+      </div>
+      <div class="modal-body">
+        <!-- Tab 1: Profile Pane -->
+        <div id="modal-pane-profile" class="modal-pane">
+          <p class="muted tiny modal-intro">设置你的创作定位与每周可用工时。工时由智能体在规划时作为严格上限约束。</p>
+          <form id="modal-profile-form" data-track>
+            <div class="form-grid">
+              <label class="field">工作空间 / 账号名称<input name="name" required maxlength="80" autocomplete="off"></label>
+              <label class="field">内容平台<input name="platform" required maxlength="100" placeholder="例如：小红书（图文）"></label>
+              <label class="field">目标受众<input name="audience" required maxlength="300" placeholder="例如：希望提升效率的独立创作者"></label>
+              <label class="field">表达语气<input name="tone" required maxlength="300" placeholder="例如：真诚、简洁、不夸大效果"></label>
+              <label class="field field-wide">内容定位<textarea name="positioning" required rows="2" maxlength="600"></textarea></label>
+              <label class="field">每周可投入时间（小时）<input name="weeklyHours" type="number" min="1" max="40" step="1" required inputmode="numeric"><small>一条计划预计 40 分钟，优先量力而行。</small></label>
+              <label class="field">当前目标<input name="goal" required maxlength="600" placeholder="例如：每周完成 3 篇有资料依据的内容"></label>
+            </div>
+            <p class="form-error" id="modal-profile-error" role="alert" hidden></p>
+            <div class="modal-footer">
+              <span class="muted tiny">保存在服务端本地工作区。</span>
+              <button class="btn btn-primary" type="submit">保存人设底稿</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 2: AI Multi-provider & Secret Box -->
+        <div id="modal-pane-ai" class="modal-pane" hidden>
+          <form id="ai-key-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>1. 模型服务提供商 (Provider)</span>
+                <select id="ai-provider-select">
+                  <option value="DeepSeek" selected>DeepSeek (默认推荐)</option>
+                  <option value="OpenAI">OpenAI</option>
+                  <option value="Gemini">Google Gemini</option>
+                  <option value="Custom">自定义兼容接口</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>2. 选用模型型号 (Model)</span>
+                <input id="ai-model-input" value="deepseek-flash" required maxlength="100">
+              </label>
+              <label class="field field-wide">
+                <span>3. 接口地址 (Base URL)</span>
+                <input id="ai-baseurl-input" value="https://api.deepseek.com" required maxlength="250">
+              </label>
+              <label class="field field-wide">
+                <span>4. API Key (密钥)</span>
+                <input id="ai-key-input" type="password" required maxlength="250" placeholder="粘贴 API Key...">
+                <small class="field-hint" style="margin-top:4px;">密钥申请链接：<a id="ai-key-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">https://platform.deepseek.com/api_keys ↗</a></small>
+              </label>
+            </div>
+            <div class="security-notes">
+              <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
+              <div>
+                <strong>🛡️ 本机高强度安全防护机制：</strong>
+                <p>· 采用 Windows DPAPI 系统底层加密，锁定本机当前登录用户；</p>
+                <p>· 服务端与前端绝不暴露密钥明文，绝不上云、不写日志；</p>
+                <p>· 保存前自动执行官方只读探测，探测成功后方可安全存盘。</p>
+              </div>
+            </div>
+            <p class="form-error" id="ai-key-feedback" role="alert" hidden></p>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" id="cancel-ai-key-btn" type="button">取消</button>
+              <button class="btn btn-primary" id="save-ai-key-btn" type="submit">🔍 探测有效性并安全保存</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

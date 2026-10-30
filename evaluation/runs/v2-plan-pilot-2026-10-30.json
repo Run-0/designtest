@@ -1,0 +1,67 @@
+{
+  "runId": "v2-plan-pilot-2026-10-30",
+  "executedAt": "2026-10-30T11:25:00.000Z",
+  "scope": "V2 目标与时间预算驱动的内容运营规划智能体真实试跑记录",
+  "model": "deepseek-flash（服务端受控调用、关闭思考、结构化 JSON 输出）",
+  "budget": {
+    "limitCny": 6.0,
+    "reservedCny": 1.8,
+    "remainingCny": 4.2,
+    "attempts": 36
+  },
+  "planningInput": {
+    "weeklyHours": 3,
+    "weeklyMinutes": 180,
+    "usedMinutes": 40,
+    "remainingMinutes": 140,
+    "audience": "希望把学习与工作安排得更清楚的大学生和职场新人",
+    "positioning": "分享亲自验证过的工具用法与小方法，一篇内容解决一个具体问题",
+    "tone": "清楚、具体、不夸大，不虚构使用体验",
+    "materialsAvailable": [
+      {
+        "id": "fd3acc07-b8a6-458b-8412-47654d66193c",
+        "title": "内置演示：把一周待办整理成三类"
+      }
+    ]
+  },
+  "planningOutput": {
+    "status": "plan",
+    "reason": "围绕待办分类、落地下一步、周末复盘拆分三篇，篇幅短、流程轻，合计130分钟，符合140分钟上限，且均避开已有标题，不声称效率提升或节省时长。",
+    "candidates": [
+      {
+        "title": "待办分三类之后，第一步该写什么",
+        "angle": "承接已有选题的分类方法，只讲“必须完成”的一类怎么补上下一步动作：把模糊事项改写成能立刻动手的一句话，举几个改写前后的对比例子，说明动作要小到当天能开始。",
+        "reason": "受众常卡在分完类仍不知从哪下手，这个角度具体、可操作；与已有标题互补而不重复，且只需引用演示资料中的分类与补下一步动作部分，30分钟可完成初稿。",
+        "estimatedMinutes": 30,
+        "sourceIds": ["fd3acc07-b8a6-458b-8412-47654d66193c"]
+      },
+      {
+        "title": "周末十分钟：给一周待办做一次复盘",
+        "angle": "讲一个周末短时复盘流程：回看三类待办哪些完成、哪些需要调整，把没动的项重新归类或补动作，并记录下调整原因，形成下周的起点。",
+        "reason": "把演示资料里的周末记录环节单独展开，解决“清单积压却不知如何收尾”的痛点；流程轻、篇幅短，适合职场新人执行，与本周规划目标一致。",
+        "estimatedMinutes": 40,
+        "sourceIds": ["fd3acc07-b8a6-458b-8412-47654d66193c"]
+      },
+      {
+        "title": "“暂缓处理”不是删掉：给待办设个回看条件",
+        "angle": "针对第三类待办，讲暂缓事项怎么写下回看条件（如某件事有进展后再处理），避免暂缓变成遗忘，也避免它们挤占当天注意力。",
+        "reason": "受众最容易忽略的一类就是暂缓，角度小而具体，一篇解决一个问题；内容完全基于演示资料的三类划分，不需额外数据，60分钟内可完成并留出核对时间。",
+        "estimatedMinutes": 60,
+        "sourceIds": ["fd3acc07-b8a6-458b-8412-47654d66193c"]
+      }
+    ],
+    "totalMinutes": 130
+  },
+  "adoptionAndDraftingVerification": {
+    "adoptedItem": {
+      "title": "待办分三类之后，第一步该写什么",
+      "estimatedMinutes": 30
+    },
+    "draftGenerated": {
+      "finalTitle": "待办分三类后，先给“必须完成”补下一步动作",
+      "codePointsLength": 544,
+      "targetRange": "400—650 码点",
+      "verdict": "正文 544 码点，完美达标；文字遵循三段式结构展开；无夸大收益，保留免责标注；通过本地规则检查，0 阻断项。"
+    }
+  }
+}

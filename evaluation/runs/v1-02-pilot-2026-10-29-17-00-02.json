@@ -1,0 +1,66 @@
+{
+  "runId": "v1-02-pilot-2026-10-29-17-00-02",
+  "executedAt": "2026-10-29T17:00:02.138Z",
+  "scope": "开发集小规模试跑，不是最终对照实验，也不能用于泛化结论",
+  "dataset": "test/fixtures/content-cases.json",
+  "caseIds": [
+    "v1-01-03"
+  ],
+  "model": "deepseek-flash",
+  "budgetBefore": {
+    "limitCny": 3,
+    "reservedCny": 1.65,
+    "remainingCny": 1.35,
+    "attempts": 33
+  },
+  "availabilityBefore": {
+    "code": "ready",
+    "canGenerateDraft": true,
+    "message": "本机保护允许尝试 AI 起草；未实时验证远端网络、密钥或赠送余额，实际调用仍可能失败。",
+    "checkedAt": "2026-10-29T17:00:02.130Z",
+    "priceCheckedUntil": "2026-11-05T16:00:00.000Z",
+    "remoteChecked": false
+  },
+  "plannedMaxRequests": 2,
+  "scorer": "assistant（实现者自评，不能替代独立评分）",
+  "cases": [
+    {
+      "caseId": "v1-01-03",
+      "category": "missing_materials",
+      "expectedOutcome": "needs_materials",
+      "task": {
+        "title": "合成测试工具的免费版够用吗",
+        "angle": "想了解虚构的合成测试工具免费版的条目上限和导出功能，但本轮没有提供任何资料。请说明需要哪些材料才能起草，不要臆造产品、价格、功能或引用，也不要把内置演示当已提供资料。"
+      },
+      "error": "本轮没有参考资料，已停止起草，避免凭空编造功能或使用体验。请先在「参考资料」补充与选题直接相关的资料（如功能范围、限制条件、价格或来源说明），再重试。",
+      "errorCode": "needs_materials",
+      "httpStatus": 422,
+      "body": null,
+      "sourceIds": [],
+      "cautions": [],
+      "toolTrace": null,
+      "aiQuery": null,
+      "querySource": null,
+      "itemId": "9255f644-444f-43d2-a28d-08b753b53cdf",
+      "requestWindow": {
+        "startedAt": "2026-10-29T17:00:02.155Z",
+        "finishedAt": "2026-10-29T17:00:02.166Z"
+      },
+      "requests": 0,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.65,
+        "remainingCny": 1.35,
+        "attempts": 33
+      }
+    }
+  ],
+  "budgetAfter": {
+    "limitCny": 3,
+    "reservedCny": 1.65,
+    "remainingCny": 1.35,
+    "attempts": 33
+  },
+  "requestsTotal": 0,
+  "assessment": "待逐条人工核对；未把夹具结构通过或文案可读当成通过"
+}

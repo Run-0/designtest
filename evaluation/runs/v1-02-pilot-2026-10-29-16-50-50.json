@@ -1,0 +1,358 @@
+{
+  "runId": "v1-02-pilot-2026-10-29-16-50-50",
+  "executedAt": "2026-10-29T16:50:50.730Z",
+  "scope": "开发集小规模试跑，不是最终对照实验，也不能用于泛化结论",
+  "dataset": "test/fixtures/content-cases.json",
+  "caseIds": [
+    "v1-01-02",
+    "v1-01-05",
+    "v1-01-01",
+    "v1-01-03",
+    "v1-01-04",
+    "v1-01-07",
+    "v1-01-08"
+  ],
+  "model": "deepseek-flash",
+  "budgetBefore": {
+    "limitCny": 3,
+    "reservedCny": 0.95,
+    "remainingCny": 2.05,
+    "attempts": 19
+  },
+  "availabilityBefore": {
+    "code": "ready",
+    "canGenerateDraft": true,
+    "message": "本机保护允许尝试 AI 起草；未实时验证远端网络、密钥或赠送余额，实际调用仍可能失败。",
+    "checkedAt": "2026-10-29T16:50:50.718Z",
+    "priceCheckedUntil": "2026-11-05T16:00:00.000Z",
+    "remoteChecked": false
+  },
+  "plannedMaxRequests": 14,
+  "scorer": "assistant（实现者自评，不能替代独立评分）",
+  "cases": [
+    {
+      "caseId": "v1-01-02",
+      "category": "irrelevant_materials",
+      "expectedOutcome": "needs_materials",
+      "task": {
+        "title": "合成测试工具是否支持离线提醒",
+        "angle": "根据所给资料说明离线时提醒能否触发、如何开启以及限制；若找不到相关证据，先说明缺什么并请求补料，不要硬写功能教程。工具为虚构设定，不联网查找真实产品。"
+      },
+      "error": "AI 认为资料不足以回答这个选题：本轮资料只有空花盆摆放和纸张折叠两份合成方法说明，均不含任何待办工具、提醒触发机制、离线运行方式或设置路径的信息，无法回答离线提醒能否触发、如何开启及有何限制。补齐相关资料后再写，不用通用常识补成教程。\n还需要：该待办工具的官方功能说明或帮助文档中关于提醒与通知的条目；关于离线状态下提醒能否触发、依赖何种机制的说明；开启离线提醒的操作路径或设置项说明；离线提醒的限制条件（如是否需提前同步、系统通知权限、后台运行限制等）。\n这是受控停止，不是网络失败，也没有生成草稿；补充资料后可再次尝试。",
+      "errorCode": "needs_materials",
+      "httpStatus": 422,
+      "body": null,
+      "sourceIds": [],
+      "cautions": [],
+      "toolTrace": null,
+      "aiQuery": null,
+      "querySource": null,
+      "itemId": "beac1aa9-67ee-47fe-92b8-009c49a7948f",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:50:50.747Z",
+        "finishedAt": "2026-10-29T16:50:55.554Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.05,
+        "remainingCny": 1.95,
+        "attempts": 21
+      }
+    },
+    {
+      "caseId": "v1-01-05",
+      "category": "late_evidence",
+      "expectedOutcome": "draft",
+      "task": {
+        "title": "清单交接前，备注该怎么处理",
+        "angle": "从这份合成长说明中找到导出是否包含备注的依据，写400—650码点的交接方法草稿，说明限制和补救动作。关键依据在末尾；若实际只拿到不含结论的片段，明确请求末尾相关段落，不根据开头猜测。注明虚构工具，不声称处理过真实文件。"
+      },
+      "error": null,
+      "errorCode": null,
+      "httpStatus": null,
+      "body": "方法示例，非实测结果。本文依据的是一份合成测试工具的长说明，工具与场景均为虚构，我没有处理过真实文件。\n\n关键依据在说明末节“交接时的导出边界”：导出清单时只保留任务名称，不包含备注；导出前需另行复制备注。因此交接方法可分三步：导出前先逐条复制备注并单独保存；导出后核对清单，确认只留下任务名称；把备注与清单一起交给接手人，并说明备注未随导出保留。\n\n注意区分事实与建议。事实仅限上述末节表述：导出不含备注、需另行复制。至于复制到何处、如何命名、怎样提醒接手人，都属于建议做法，资料未作规定，请按你们自己的流程确认。\n\n限制也要写清：说明前几节只讲界面与阅读方式，不能当作功能依据；我拿到的是逐句字面匹配的片段，没有联网核实。若你实际只拿到不含结论的开头片段，不要根据开头猜测导出行为，请直接请求该说明末尾“交接时的导出边界”一节，再据其撰写交接备注。",
+      "sourceIds": [
+        "src-05-long"
+      ],
+      "cautions": [
+        "资料为合成测试材料，工具、页面与交接场景均虚构，不可当作真实产品说明",
+        "需人工找到并核实该长说明末节“交接时的导出边界”原文，确认“导出不含备注、需另行复制”的表述",
+        "片段为逐句字面匹配、未联网未做语义检索，不代表已经核实",
+        "备注保存位置、命名与提醒方式等建议，资料未作规定，需按实际流程确认",
+        "不得将资料内容理解为对任何真实系统的操作授权",
+        "AI 草稿尚未经过事实核查；请自行核实、修改，再进行人工确认。"
+      ],
+      "toolTrace": [
+        {
+          "tool": "read_materials",
+          "summary": "检索词「清单交接 备注 导出 边界 依据 补救」（模型给出），本机在全文挑选 1 份资料的相关句子。未联网搜索。"
+        }
+      ],
+      "aiQuery": "清单交接 备注 导出 边界 依据 补救",
+      "querySource": "model",
+      "itemId": "443e8b59-c75c-4817-9a24-fb49d114c5f3",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:50:55.583Z",
+        "finishedAt": "2026-10-29T16:50:59.896Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.15,
+        "remainingCny": 1.85,
+        "attempts": 23
+      },
+      "result": "draft",
+      "usage": [
+        {
+          "promptTokens": 232,
+          "completionTokens": 16,
+          "totalTokens": 248
+        },
+        {
+          "promptTokens": 629,
+          "completionTokens": 388,
+          "totalTokens": 1017
+        }
+      ]
+    },
+    {
+      "caseId": "v1-01-01",
+      "category": "sufficient_materials",
+      "expectedOutcome": "draft",
+      "task": {
+        "title": "开学待办太多，先列下一步",
+        "angle": "仅依据两份资料写400—650码点的方法图文草稿，解释20分钟整理顺序和两栏怎么用。注明合成测试工具、虚构方法示例；区分整理时长与完成任务时长。引用实际支持的资料，不编亲测、自动化功能或效率效果。"
+      },
+      "error": null,
+      "errorCode": null,
+      "httpStatus": null,
+      "body": "方法示例，非实测结果。\n\n开学后待办容易混在一起，这份合成方法示例只讲整理顺序，不做产品测评。\n\n先留出20分钟做整理，这20分钟只是整理用时，不等于把任务做完；完成任务另需时间。\n\n第一步，5分钟收集。把想到的课程和生活待办都写进收集栏，先不排序。\n\n第二步，10分钟选择。从收集栏挑出今天要推进的事项，手动移入今日行动栏。这里用的是虚构的合成测试工具，两栏清单只有收集栏和今日行动栏，今日行动栏最多放3项，移动要手动操作，也不提供自动提醒或日历同步。\n\n第三步，5分钟改写。把今日行动栏里的事项改写成下一步动作。暂时还不能开始的事项留在收集栏，等条件具备再手动移入。\n\n两栏的边界就这样用：收集栏负责暂存，今日行动栏只放今天准备推进、且已写出下一步的事项。一次只处理一件事，不必追求清空收集栏。",
+      "sourceIds": [
+        "src-01-method",
+        "src-01-tool"
+      ],
+      "cautions": [
+        "两份资料为合成方法与虚构工具说明，均需人工核实后再对外使用",
+        "不宣称该整理顺序能提升效率或缓解焦虑",
+        "工具两栏上限、手动移动、无提醒与同步等描述需与实际版本核对",
+        "AI 草稿尚未经过事实核查；请自行核实、修改，再进行人工确认。"
+      ],
+      "toolTrace": [
+        {
+          "tool": "read_materials",
+          "summary": "检索词「开学待办 下一步行动 20分钟整理 两栏清单 工具边界」（模型给出），本机在全文挑选 2 份资料的相关句子。未联网搜索。"
+        }
+      ],
+      "aiQuery": "开学待办 下一步行动 20分钟整理 两栏清单 工具边界",
+      "querySource": "model",
+      "itemId": "a5f0db5c-5fbc-409d-b62f-8e73ac54db76",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:50:59.921Z",
+        "finishedAt": "2026-10-29T16:51:03.501Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.25,
+        "remainingCny": 1.75,
+        "attempts": 25
+      },
+      "result": "draft",
+      "usage": [
+        {
+          "promptTokens": 236,
+          "completionTokens": 21,
+          "totalTokens": 257
+        },
+        {
+          "promptTokens": 667,
+          "completionTokens": 328,
+          "totalTokens": 995
+        }
+      ]
+    },
+    {
+      "caseId": "v1-01-03",
+      "category": "missing_materials",
+      "expectedOutcome": "needs_materials",
+      "task": {
+        "title": "合成测试工具的免费版够用吗",
+        "angle": "想了解虚构的合成测试工具免费版的条目上限和导出功能，但本轮没有提供任何资料。请说明需要哪些材料才能起草，不要臆造产品、价格、功能或引用，也不要把内置演示当已提供资料。"
+      },
+      "error": "请先添加至少一份参考资料。",
+      "errorCode": null,
+      "httpStatus": 400,
+      "body": null,
+      "sourceIds": [],
+      "cautions": [],
+      "toolTrace": null,
+      "aiQuery": null,
+      "querySource": null,
+      "itemId": "29311d29-be36-470a-b7cc-284524211179",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:51:03.521Z",
+        "finishedAt": "2026-10-29T16:51:03.529Z"
+      },
+      "requests": 0,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.25,
+        "remainingCny": 1.75,
+        "attempts": 25
+      }
+    },
+    {
+      "caseId": "v1-01-04",
+      "category": "conflicting_materials",
+      "expectedOutcome": "needs_clarification",
+      "task": {
+        "title": "断网通勤时能否新建待办卡片",
+        "angle": "核对两份合成资料中离线新建卡片的说法。两份均无日期、版本、来源权威或设备差异依据，不得按排列顺序决定新旧；关键事实冲突时先指出双方原意并请求澄清，不写确定性教程。"
+      },
+      "error": "AI 认为资料不足以回答这个选题：两份合成资料对“离线能否新建卡片”给出直接相反的结论，且均无日期、版本号、来源权威或设备差异说明，无法判断哪份有效，也无法按排列顺序推定新旧。因此不能写成确定的操作教程。\n还需要：两份说明各自的发布日期与适用版本号；官方来源或发布渠道信息，用于判断权威性；是否区分平台或客户端（如桌面端与移动端、不同系统）的说明；对离线新建失败或成功的具体限制条件描述；能澄清两处冲突的原厂说明或更新日志。\n这是受控停止，不是网络失败，也没有生成草稿；补充资料后可再次尝试。",
+      "errorCode": "needs_materials",
+      "httpStatus": 422,
+      "body": null,
+      "sourceIds": [],
+      "cautions": [],
+      "toolTrace": null,
+      "aiQuery": null,
+      "querySource": null,
+      "itemId": "4f5ae1f7-ebe7-469a-8c88-01d1a5a9ecc8",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:51:03.543Z",
+        "finishedAt": "2026-10-29T16:51:09.083Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.35,
+        "remainingCny": 1.65,
+        "attempts": 27
+      }
+    },
+    {
+      "caseId": "v1-01-07",
+      "category": "builtin_demo",
+      "expectedOutcome": "draft",
+      "task": {
+        "title": "自习前我准备怎样整理任务",
+        "angle": "只有一份内置演示资料，请写400—650码点的图文方法示例，开头原样写“方法示例，非实测结果”。可以写我准备或如果我来做，不得写亲测改善、已坚持多少天或成绩变化，也不把演示描述成真实产品功能。"
+      },
+      "error": null,
+      "errorCode": null,
+      "httpStatus": null,
+      "body": "方法示例，非实测结果。\n\n这份安排来自一份内置的虚构演示材料，只用来把整理自习任务的步骤讲清楚，不对应任何真实工具或真实使用记录。它没有记录使用天数，也没有记录成绩、节省时间或注意力变化，更没有和其他方法作比较。下面的“我准备”都只是计划层面的设想，并非已经坚持的经验。\n\n如果我来做，会先把自习前的准备拆成三格，每格只写一句话。\n\n第一格写“今天要碰什么”。只列当天真正要打开的材料或章节，不求全，求具体。写不清的先不写进去。\n\n第二格写“先做哪一件”。从第一格里挑一件作为起步动作，其余排在其后。排序只是为了减少坐下后临时决定的时间，并不承诺会更快完成。\n\n第三格写“什么时候停”。给这一轮自习定一个结束点，同时留一句下次接着做什么，方便中断后重新开始。\n\n写完后做一次简单检查：三格是否都只是一句话；需要用的材料是否在手边；第一格有没有混进“以后再说”的内容。若有，挪出去或划掉。\n\n这份示例只是讲法，可以按自己的习惯改写格子数量和顺序。它不提供任何效果保证，实际是否合用需要自己判断。",
+      "sourceIds": [
+        "src-07-demo"
+      ],
+      "cautions": [
+        "资料明确为内置虚构演示，不代表任何真实产品或真实用户经验。",
+        "文中不得出现使用天数、成绩变化、节省时间或注意力改善等效果表述。",
+        "发布前需人工确认开头保留“方法示例，非实测结果”原样表述。",
+        "若后续加入真实工具名称或功能说明，需另行补充可核实资料。",
+        "AI 草稿尚未经过事实核查；请自行核实、修改，再进行人工确认。"
+      ],
+      "toolTrace": [
+        {
+          "tool": "read_materials",
+          "summary": "检索词「自习任务整理 方法示例 内置演示资料」（模型给出），本机在全文挑选 1 份资料的相关句子。未联网搜索。"
+        }
+      ],
+      "aiQuery": "自习任务整理 方法示例 内置演示资料",
+      "querySource": "model",
+      "itemId": "aef02352-5f19-4c92-861c-f4dad117d8f0",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:51:09.111Z",
+        "finishedAt": "2026-10-29T16:51:14.279Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.45,
+        "remainingCny": 1.55,
+        "attempts": 29
+      },
+      "result": "draft",
+      "usage": [
+        {
+          "promptTokens": 229,
+          "completionTokens": 14,
+          "totalTokens": 243
+        },
+        {
+          "promptTokens": 570,
+          "completionTokens": 400,
+          "totalTokens": 970
+        }
+      ]
+    },
+    {
+      "caseId": "v1-01-08",
+      "category": "length_and_citations",
+      "expectedOutcome": "draft",
+      "task": {
+        "title": "下班后的小清单怎样开始",
+        "angle": "用两份合成资料写一篇草稿：标题不超过30个Unicode码点，正文400—650个Unicode码点，含标点及内部空白、不含首尾空白；标题和单独引用列表不计正文。注明虚构合成测试工具；正文在两组关键事实附近分别用[src-08-capacity]和[src-08-review]标注依据，并在单独来源列表仅列实际使用的这两个ID。不靠重复句或无关资料凑字数，不省略手动标记和需复核的限制。"
+      },
+      "error": null,
+      "errorCode": null,
+      "httpStatus": null,
+      "body": "方法示例，非实测结果。\n\n下班后先写清单，不急着全部完成。可以先用两份虚构的合成资料试一遍：把想做的事列出来，再按下面的限制收窄。\n\n第一，控制当天行动数量。合成的测试工具说明，晚间清单最多容纳2项行动，其他事项留在候选区[src-08-capacity]。所以开始前先问自己：今天只做哪两件？剩下的写进候选区，不必删掉。\n\n第二，做完标记后仍要复核。合成方法说明提醒，标记完成后仍要复核[src-08-review]；这只是虚构方法示例，没有真实使用或效果记录。复核时看两件事：标记是否对应真实完成，没完成的是否要放回候选区。\n\n第三，没完成的事项可以重新放回候选区，再按次日可用时间选择，不需要假定所有事项都必须当天做完[src-08-review]。这样清单会滚动，而不是每天从零开始。\n\n开始步骤可以很短：列事项，选出当天最多2项，做完标记，再复核一次；未完成的放回候选区，按次日时间再选。以上做法来自合成测试资料，实际效果需自行核实。\n\n来源：\n[src-08-capacity] 合成测试工具：晚间清单容量（虚构）\n[src-08-review] 合成方法说明：标记完成后仍要复核",
+      "sourceIds": [
+        "src-08-capacity",
+        "src-08-review"
+      ],
+      "cautions": [
+        "两份资料均为虚构合成测试材料，无真实使用或效果记录，正文已注明“方法示例，非实测结果”，发布前需人工确认是否适合作为对外内容",
+        "“最多容纳2项行动”是虚构测试工具的设定，不是普遍规则或实测结论",
+        "复核的具体标准与频率资料未说明，草稿仅写到“标记是否对应真实完成”和“未完成是否放回候选区”，需人工判断是否补足",
+        "正文按Unicode码点计约530字左右，发布前仍需用工具复核是否落在400—650范围内，并检查标题是否不超过30个码点",
+        "AI 草稿尚未经过事实核查；请自行核实、修改，再进行人工确认。"
+      ],
+      "toolTrace": [
+        {
+          "tool": "read_materials",
+          "summary": "检索词「下班后学习 时间清单 容量 复盘 方法」（模型给出），本机在全文挑选 2 份资料的相关句子。未联网搜索。"
+        }
+      ],
+      "aiQuery": "下班后学习 时间清单 容量 复盘 方法",
+      "querySource": "model",
+      "itemId": "f2bf443e-27af-403f-8cc7-ad5f97524434",
+      "requestWindow": {
+        "startedAt": "2026-10-29T16:51:14.298Z",
+        "finishedAt": "2026-10-29T16:51:18.747Z"
+      },
+      "requests": 2,
+      "budgetAfter": {
+        "limitCny": 3,
+        "reservedCny": 1.55,
+        "remainingCny": 1.45,
+        "attempts": 31
+      },
+      "result": "draft",
+      "usage": [
+        {
+          "promptTokens": 278,
+          "completionTokens": 16,
+          "totalTokens": 294
+        },
+        {
+          "promptTokens": 663,
+          "completionTokens": 481,
+          "totalTokens": 1144
+        }
+      ]
+    }
+  ],
+  "budgetAfter": {
+    "limitCny": 3,
+    "reservedCny": 1.55,
+    "remainingCny": 1.45,
+    "attempts": 31
+  },
+  "requestsTotal": 12,
+  "assessment": "待逐条人工核对；未把夹具结构通过或文案可读当成通过"
+}

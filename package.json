@@ -1,0 +1,14 @@
+{
+  "name": "solo-operations-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "面向一人公司的内容运营工作台，本地流程验证版",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs --open",
+    "serve": "node server.mjs",
+    "test": "node --test",
+    "ui-check": "node evaluation/ui-check.mjs"
+  }
+}
