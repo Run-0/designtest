@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createAiClient } from '../ai-client.mjs';
-import { generateAiDraft, generateAiPlan, selectMaterials } from '../ai-workflow.mjs';
+import { generateAiDraft, generateAiPlan, selectMaterials, chunkSource, retrieveChunks } from '../ai-workflow.mjs';
 
 // 全部为模拟响应与隔离目录；不调用外部模型、不读取真实数据或凭据。
 const NOW = Date.parse('2026-10-29T00:30:00+08:00');
@@ -270,4 +270,69 @@ test('generateAiPlan：模型返回 needs_materials 时受控停止，不创建�
     return true;
   });
   assert.equal(f.chats.length, 1);
+});
+
+test('chunkSource 轻量级切片：按句切分、保留重叠与长句自动分段', () => {
+  const shortSource = { id: 's-short', title: '短资料', content: '霜降水返壑。风落木归山。' };
+  const shortChunks = chunkSource(shortSource, { chunkSize: 220, overlap: 40 });
+  assert.equal(shortChunks.length, 1);
+  assert.equal(shortChunks[0].chunkId, 's-short#c0');
+  assert.equal(shortChunks[0].sourceTitle, '短资料');
+  assert.equal(shortChunks[0].text, '霜降水返壑。风落木归山。');
+
+  const longContent = '草木黄落而果实收。'.repeat(30);
+  const longSource = { id: 's-long', title: '长资料', content: longContent };
+  const longChunks = chunkSource(longSource, { chunkSize: 100, overlap: 20 });
+  assert.ok(longChunks.length > 2);
+  assert.equal(longChunks[0].chunkId, 's-long#c0');
+  assert.equal(longChunks[1].chunkId, 's-long#c1');
+  assert.ok(longChunks.every(c => c.sourceId === 's-long'));
+});
+
+test('retrieveChunks 内存倒排与切片检索：相关度打分、标题加权与多词覆盖', () => {
+  const sources = [
+    { id: 'src-1', title: '遵生八笺起居', content: '秋末冬初，阳气潜藏。起居调摄，百合雪梨汤。', kind: 'user' },
+    { id: 'src-2', title: '无关茶经', content: '陆羽茶经，初沸如鱼目，二沸如涌泉。', kind: 'user' },
+  ];
+  const query = '起居 调摄';
+  const retrieved = retrieveChunks(sources, query, { topK: 3 });
+  assert.ok(retrieved.length >= 1);
+  assert.equal(retrieved[0].sourceId, 'src-1');
+  assert.ok(retrieved[0].score > 0);
+  assert.ok(retrieved[0].text.includes('起居'));
+
+  // 无关词不召回
+  assert.equal(retrieveChunks(sources, '飞船 空间站').length, 0);
+});
+
+test('generateAiDraft 支持精准知识切片引用溯源 citations 校验与透传', async t => {
+  const f = await fixture(t);
+  const draftWithCitations = {
+    ...draft(),
+    citations: [
+      { ref: 1, chunkId: 'a#c0', sourceTitle: '计划甲', quote: '先列待办再写下一步' },
+    ],
+  };
+  f.replies = [JSON.stringify(queryReply('计划')), JSON.stringify(draftWithCitations)];
+  const output = await unchanged(f, () => generateAiDraft(f.ai, f.state, f.item));
+  assert.equal(output.ai.citations.length, 1);
+  assert.equal(output.ai.citations[0].ref, 1);
+  assert.equal(output.ai.citations[0].sourceTitle, '计划甲');
+  assert.equal(output.ai.citations[0].quote, '先列待办再写下一步');
+  assert.ok(Array.isArray(output.ai.retrievedChunks));
+  assert.ok(output.ai.toolTrace.some(t => t.tool === 'rag_retrieve_chunks'));
+});
+
+test('generateAiDraft 拒绝格式非法的 citations 结构，不覆盖原稿', async t => {
+  const invalidVariants = [
+    { citations: '不是数组' },
+    { citations: [{ ref: '一', sourceTitle: '标题', quote: '原句' }] },
+    { citations: [{ ref: 1, sourceTitle: '', quote: '原句' }] },
+    { citations: [{ ref: 1, sourceTitle: '标题', quote: '' }] },
+  ];
+  for (const variant of invalidVariants) {
+    const f = await fixture(t);
+    f.replies = [JSON.stringify(queryReply()), JSON.stringify({ ...draft(), ...variant })];
+    await unchanged(f, () => assert.rejects(generateAiDraft(f.ai, f.state, f.item), /正文与引用校验/));
+  }
 });

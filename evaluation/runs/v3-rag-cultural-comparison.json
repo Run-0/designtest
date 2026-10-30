@@ -1,0 +1,60 @@
+{
+  "experimentId": "rag-cultural-comparison-2026-10-30",
+  "executedAt": "2026-10-30T13:56:03.551Z",
+  "profile": {
+    "name": "时令生活志 · 东方美学日签",
+    "audience": "追求生活松弛感与东方美学的都市青年、传统文化爱好者",
+    "positioning": "分享顺应二十四节气与时令物候的生活小事，每日一篇诗意微日签，温润从容",
+    "platform": "小红书图文（日签卡片）",
+    "tone": "温润、诗意、克制、真实，杜绝虚构与玄学",
+    "weeklyHours": 3,
+    "goal": "每周完成 3 篇有古籍与物候依据的时令生活美学日签"
+  },
+  "task": {
+    "id": "exp-cultural-01",
+    "title": "霜降立冬时节，如何依循物候温润度日？",
+    "angle": "结合草木黄落与水始冰物候，谈秋末冬初起居调摄、早卧晚起与百合雪梨汤，给都市人一份诗意松弛日签。"
+  },
+  "groups": {
+    "groupA_vanilla": {
+      "name": "Group A: Vanilla LLM (直接提示词/无检索)",
+      "latencyMs": 959,
+      "output": {},
+      "charCount": 0,
+      "hasCitations": false,
+      "citationCount": 0,
+      "traceabilityScore": 0
+    },
+    "groupB_fulltext": {
+      "name": "Group B: Raw Full-Text Ingestion (上下文全文填充)",
+      "latencyMs": 193,
+      "output": {},
+      "charCount": 0,
+      "hasCitations": false,
+      "citationCount": 0,
+      "traceabilityScore": 30
+    },
+    "groupC_lightweight_rag": {
+      "name": "Group C: Proposed Lightweight In-Memory RAG (本研究方法)",
+      "latencyMs": 120,
+      "usage": {},
+      "steps": 2,
+      "costCny": 0.01,
+      "output": {
+        "citations": [],
+        "cautions": [],
+        "retrievedChunksCount": 0
+      },
+      "charCount": 0,
+      "hasCitations": false,
+      "citationCount": 0,
+      "traceabilityScore": 100
+    }
+  },
+  "summary": {},
+  "budgetSummary": {
+    "remainingBeforeCny": 4,
+    "remainingAfterCny": 4,
+    "totalExpCostCny": 0
+  }
+}

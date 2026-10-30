@@ -625,3 +625,32 @@ test('AI 草稿检查保留人工核实提醒，并细化字数分档报告', ()
   warnings = state.items[0].review.checks.filter(check => check.level === 'warning');
   assert.ok(!warnings.some(check => check.message.includes('400—650')));
 });
+
+test('任务归档与取消归档：归档任务不计入当前周工时预算，已发布任务不可重复归档', () => {
+  let state = planned(2, 3); // 2 items, 40m each = 80m. Total = 180m. Remaining = 100m.
+  const [item1, item2] = state.items;
+  let budget = calculateTimeBudget(state);
+  assert.equal(budget.usedMinutes, 80);
+  assert.equal(budget.remainingMinutes, 100);
+  assert.equal(budget.activeCount, 2);
+
+  // 归档 item1
+  state = apply(state, 'POST', itemPath(item1.id, 'archive'));
+  assert.equal(state.items.find(i => i.id === item1.id).archived, true);
+  budget = calculateTimeBudget(state);
+  assert.equal(budget.usedMinutes, 40); // 只有 item2 计入
+  assert.equal(budget.remainingMinutes, 140);
+  assert.equal(budget.activeCount, 1);
+
+  // 取消归档 item1
+  state = apply(state, 'POST', itemPath(item1.id, 'unarchive'));
+  assert.equal(state.items.find(i => i.id === item1.id).archived, false);
+  budget = calculateTimeBudget(state);
+  assert.equal(budget.usedMinutes, 80);
+  assert.equal(budget.remainingMinutes, 100);
+  assert.equal(budget.activeCount, 2);
+
+  // 已发布任务不可归档
+  state = publish(state, item2.id);
+  rejects(state, 'POST', itemPath(item2.id, 'archive'), {}, 400);
+});

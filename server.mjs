@@ -63,6 +63,12 @@ function validStoredState(state) {
       if (!Array.isArray(ai.requestIds) || ai.requestIds.length > 2 || !ai.requestIds.every(value => string(value, 100))) return false;
       if (ai.query !== undefined && !string(ai.query, 80)) return false;
       if (ai.querySource !== undefined && !['model', 'fallback:title'].includes(ai.querySource)) return false;
+      if (ai.citations !== undefined) {
+        if (!Array.isArray(ai.citations) || ai.citations.length > 20 || !ai.citations.every(c => object(c) && number(c.ref, 1, 100) && string(c.sourceTitle, 200) && string(c.quote, 300))) return false;
+      }
+      if (ai.retrievedChunks !== undefined) {
+        if (!Array.isArray(ai.retrievedChunks) || ai.retrievedChunks.length > 20 || !ai.retrievedChunks.every(c => object(c) && string(c.chunkId, 100) && string(c.sourceId, 100) && string(c.sourceTitle, 200) && string(c.text, 5000))) return false;
+      }
     }
     return true;
   })) return false;

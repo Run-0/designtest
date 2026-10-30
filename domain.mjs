@@ -67,7 +67,7 @@ const ideas = [
 ];
 
 export function calculateTimeBudget(state) {
-  const active = state.items.filter(item => item.status !== 'published');
+  const active = state.items.filter(item => item.status !== 'published' && !item.archived);
   const usedMinutes = active.reduce((sum, item) => sum + item.estimatedMinutes, 0);
   const totalMinutes = state.profile.weeklyHours * 60;
   const remainingMinutes = Math.max(0, totalMinutes - usedMinutes);
@@ -97,7 +97,7 @@ function plan(state, body) {
       return {
         id: id(), title, angle, reason, estimatedMinutes, status: 'idea', body: '',
         sourceIds: [...new Set(sourceIds)], revision: 0, review: null, publishedUrl: null,
-        publishedAt: null, metrics: null, createdAt: now(), updatedAt: now(),
+        publishedAt: null, metrics: null, archived: false, createdAt: now(), updatedAt: now(),
       };
     });
     if (budget.usedMinutes + totalNewMinutes > budget.totalMinutes) {
@@ -117,7 +117,7 @@ function plan(state, body) {
   if (available.length < count) fail(`内置模板只剩 ${available.length} 个未使用选题，请减少数量。更多选题需要后续接入 AI。`);
   const created = available.slice(0, count).map(idea => ({
     id: id(), ...idea, estimatedMinutes: 40, status: 'idea', body: '', sourceIds: [], revision: 0,
-    review: null, publishedUrl: null, publishedAt: null, metrics: null, createdAt: now(), updatedAt: now(),
+    review: null, publishedUrl: null, publishedAt: null, metrics: null, archived: false, createdAt: now(), updatedAt: now(),
   }));
   state.items.push(...created);
   event(state, 'plan', `用内置模板创建了 ${created.length} 个选题，预计制作 ${created.length * 40} 分钟（人工估计，非模型预测）。`);
@@ -188,7 +188,7 @@ export function mutate(original, method, path, body = {}) {
     event(state, 'source', `已保存资料「${source.title}」。链接仅作来源记录，不会自动抓取。`);
   } else {
     const sourceMatch = path.match(/^\/api\/sources\/([^/]+)$/);
-    const itemMatch = path.match(/^\/api\/items\/([^/]+)(?:\/(draft|review|approve|publish|metrics))?$/);
+    const itemMatch = path.match(/^\/api\/items\/([^/]+)(?:\/(draft|review|approve|publish|metrics|archive|unarchive))?$/);
     if (method === 'DELETE' && sourceMatch) {
       const source = state.sources.find(entry => entry.id === sourceMatch[1]);
       if (!source) fail('资料不存在。', 404);
@@ -237,6 +237,13 @@ export function mutate(original, method, path, body = {}) {
           saves: integer(body.saves, '收藏数', 0, 1_000_000_000), recordedAt: now(),
         };
         event(state, 'metrics', `已保存「${item.title}」的手动录入数据（累计快照，覆盖上一次数值，不重复累加）。`);
+      } else if (method === 'POST' && action === 'archive') {
+        if (item.status === 'published') fail('已发布内容已归入发布历史，无需重复归档。');
+        item.archived = true;
+        event(state, 'archive', `已将「${item.title}」移入归档，不再计入本周工时预算。`);
+      } else if (method === 'POST' && action === 'unarchive') {
+        item.archived = false;
+        event(state, 'unarchive', `已将「${item.title}」移回活跃任务列表，重新计入本周工时预算。`);
       } else fail('没有这个操作。', 404);
       item.updatedAt = now();
     } else fail('没有这个接口。', 404);

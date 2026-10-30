@@ -136,7 +136,7 @@ export class AiConnectionStatus {
   if (!document.querySelector('#main-content')) return;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-  const pageNames = { overview: '总览', studio: '内容工作台', sources: '参考资料', report: '数据复盘', roadmap: '毕设路线' };
+  const pageNames = { overview: '工作台', studio: '创作空间', sources: '知识库', report: '数据复盘', roadmap: '毕设路线' };
   const statusNames = { idea: '待起草', draft: '草稿', reviewed: '已检查', approved: '待发布', published: '已登记发布' };
   const PROVIDER_METAS = {
     DeepSeek: {
@@ -206,7 +206,8 @@ export class AiConnectionStatus {
   }
 
   function text(selector, value) {
-    $(selector).textContent = String(value ?? '');
+    const node = $(selector);
+    if (node) node.textContent = String(value ?? '');
   }
 
   function number(value) {
@@ -371,10 +372,22 @@ export class AiConnectionStatus {
     return data;
   }
 
+  function updateSyncTime() {
+    try {
+      const timeStr = new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).format(new Date());
+      text('#statusbar-sync-time', '最近同步：' + timeStr);
+    } catch {
+      text('#statusbar-sync-time', '最近同步：刚刚');
+    }
+  }
+
   async function writeState(path, method, body, refresh = {}) {
     state = validateState(await request(path, { method, body }));
     stateChanged = true;
     Object.assign(ui, refresh);
+    updateSyncTime();
     return state;
   }
 
@@ -597,6 +610,7 @@ export class AiConnectionStatus {
       const estimate = el('span');
       estimate.append(icon('clock'), document.createTextNode('预计 ' + number(item.estimatedMinutes) + ' 分钟'));
       foot.append(estimate, el('span', '', '第 ' + number(item.revision) + ' 版'));
+      if (item.archived) foot.append(el('span', 'status-pill', '📦 已归档'));
       card.append(top, el('h3', '', item.title));
       if (item.angle) card.append(el('p', '', item.angle));
       if (item.reason) card.append(el('p', 'content-reason', '选题理由：' + item.reason));
@@ -675,6 +689,36 @@ export class AiConnectionStatus {
       cautions.forEach(value => list.append(el('li', '', value)));
       target.append(list);
     }
+    const citations = Array.isArray(ai.citations) ? ai.citations : [];
+    if (citations.length) {
+      target.append(el('h3', '', '📌 知识切片溯源引用依据（轻量 RAG）'));
+      const citationList = el('div', 'citation-list');
+      citations.forEach(c => {
+        const itemEl = el('div', 'citation-card');
+        const badge = el('span', 'citation-badge', `[${c.ref}]`);
+        const titleEl = el('strong', 'citation-title', c.sourceTitle || '参考资料');
+        const quoteEl = el('p', 'citation-quote', `原句摘录：“${c.quote}”`);
+        itemEl.append(badge, titleEl, quoteEl);
+        citationList.append(itemEl);
+      });
+      target.append(citationList);
+    }
+    const retrievedChunks = Array.isArray(ai.retrievedChunks) ? ai.retrievedChunks : [];
+    if (retrievedChunks.length) {
+      const details = el('details', 'rag-chunks-details');
+      const summary = el('summary', '', `🔍 命中的知识切片微段落（共 ${retrievedChunks.length} 个）`);
+      const chunksList = el('div', 'chunks-list');
+      retrievedChunks.forEach(chunk => {
+        const cEl = el('div', 'rag-chunk-item');
+        cEl.append(
+          el('div', 'rag-chunk-meta', `${chunk.sourceTitle} · ${chunk.chunkId}`),
+          el('div', 'rag-chunk-text', chunk.text)
+        );
+        chunksList.append(cEl);
+      });
+      details.append(summary, chunksList);
+      target.append(details);
+    }
     target.append(el('h3', '', '工具调用摘要（不含隐藏推理）'));
     const trace = Array.isArray(ai.toolTrace) ? ai.toolTrace.filter(entry => entry && typeof entry.tool === 'string' && typeof entry.summary === 'string') : [];
     if (trace.length) {
@@ -751,6 +795,10 @@ export class AiConnectionStatus {
       : aiStatus.label + '。原因见顶部，可点击「刷新AI状态」；模板起草不花费预算。');
     $('#export-draft').disabled = !hasBody;
     text('#export-draft span', dirty ? '保存后导出 TXT' : '导出 TXT');
+    if ($('#archive-draft-btn')) {
+      $('#archive-draft-btn').hidden = published;
+      text('#archive-draft-btn span', item.archived ? '📦 移出归档（计入本周）' : '📦 移入归档（不占本周）');
+    }
     $('#review-draft').disabled = published || !validText;
     text('#review-draft', dirty ? '保存并规则检查' : '运行规则检查');
     $('#human-confirm').disabled = !reviewed || blocked || published;
@@ -772,20 +820,6 @@ export class AiConnectionStatus {
 
   function renderSources() {
     text('#source-total', number(state.sources.length) + ' 份资料');
-    text('#drawer-source-count', state.sources.length);
-    const drawerList = $('#drawer-all-sources-list');
-    if (drawerList) {
-      drawerList.replaceChildren();
-      if (!state.sources.length) {
-        drawerList.append(el('p', 'tiny muted', '本地资料库暂无资料。'));
-      } else {
-        newest(state.sources).forEach(s => {
-          const item = el('div', 'drawer-source-item');
-          item.append(el('strong', '', s.title), el('p', '', s.content));
-          drawerList.append(item);
-        });
-      }
-    }
     const target = $('#source-list');
     target.replaceChildren();
     if (!state.sources.length) {
@@ -1021,6 +1055,7 @@ export class AiConnectionStatus {
       ui.profileRefresh = true;
       ui.metricsRefresh = true;
       renderState();
+      updateSyncTime();
       $('#pages').hidden = false;
       $('#boot-state').hidden = true;
       if (ui.page === 'report') loadReport();
@@ -1042,7 +1077,13 @@ export class AiConnectionStatus {
     const trigger = event.target.closest('[data-page], [data-go]');
     if (!trigger) return;
     event.preventDefault();
-    navigate(trigger.dataset.page || trigger.dataset.go);
+    const target = trigger.dataset.page || trigger.dataset.go;
+    if (target === 'content') {
+      navigate('studio');
+      $('#idea-input')?.focus();
+      return;
+    }
+    navigate(target);
   });
 
   window.addEventListener('hashchange', () => {
@@ -1310,6 +1351,18 @@ export class AiConnectionStatus {
     });
   });
 
+  $('#archive-draft-btn')?.addEventListener('click', event => {
+    const item = currentItem();
+    if (!item || item.status === 'published') return;
+    runAction(event.currentTarget, '#editor-error', async () => {
+      await saveEditorIfDirty();
+      const current = currentItem();
+      const action = current.archived ? 'unarchive' : 'archive';
+      await writeState('/api/items/' + encodeURIComponent(current.id) + '/' + action, 'POST', {}, { editorRefresh: true });
+      showToast(current.archived ? '已移出归档，重新计入本周工时预算' : '已移入归档，不再计入本周工时预算');
+    });
+  });
+
   $('#source-form').addEventListener('submit', event => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -1455,48 +1508,6 @@ export class AiConnectionStatus {
     });
   });
 
-  $('#drawer-tab-btn-sources')?.addEventListener('click', () => {
-    $('#drawer-tab-btn-sources').classList.add('active');
-    $('#drawer-tab-btn-report').classList.remove('active');
-    $('#drawer-pane-sources').hidden = false;
-    $('#drawer-pane-report').hidden = true;
-  });
-  $('#drawer-tab-btn-report')?.addEventListener('click', () => {
-    $('#drawer-tab-btn-report').classList.add('active');
-    $('#drawer-tab-btn-sources').classList.remove('active');
-    $('#drawer-pane-sources').hidden = true;
-    $('#drawer-pane-report').hidden = false;
-  });
-
-  $('#drawer-add-source-toggle-btn')?.addEventListener('click', () => {
-    const box = $('#drawer-add-source-box');
-    box.hidden = !box.hidden;
-    if (!box.hidden) $('#drawer-source-form [name="title"]').focus();
-  });
-  $('#cancel-drawer-source-btn')?.addEventListener('click', () => {
-    $('#drawer-add-source-box').hidden = true;
-  });
-  $('#drawer-source-form')?.addEventListener('submit', event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const values = Object.fromEntries(new FormData(form));
-    runAction(event.submitter, '#source-error', async () => {
-      const title = values.title.trim();
-      const content = values.content.trim();
-      if (!title || !content) throw new Error('请填写资料标题和正文。');
-      const payload = { title, content };
-      if (values.url?.trim()) {
-        const url = safeUrl(values.url.trim());
-        if (!url) throw new Error('来源网址请以 https:// 开头，或留空。');
-        payload.url = url;
-      }
-      await writeState('/api/sources', 'POST', payload);
-      form.reset();
-      $('#drawer-add-source-box').hidden = true;
-      showToast('参考资料已保存到本地资料库！');
-    });
-  });
-
   function openSettings(tab = 'profile') {
     $('#settings-modal').hidden = false;
     switchSettingsTab(tab);
@@ -1533,6 +1544,32 @@ export class AiConnectionStatus {
     if ($('#modal-pane-ai')) $('#modal-pane-ai').hidden = isProfile;
   }
 
+  function toggleAiPopover(force) {
+    const popover = $('#ai-status-popover');
+    const badge = $('#mode-badge');
+    if (!popover || !badge) return;
+    const shouldShow = typeof force === 'boolean' ? force : popover.hidden;
+    popover.hidden = !shouldShow;
+    badge.setAttribute('aria-expanded', String(shouldShow));
+  }
+
+  $('#mode-badge')?.addEventListener('click', () => toggleAiPopover());
+  $('#close-ai-popover')?.addEventListener('click', () => toggleAiPopover(false));
+  $('#popover-settings-btn')?.addEventListener('click', () => {
+    toggleAiPopover(false);
+    openSettings('ai');
+  });
+
+  document.addEventListener('click', event => {
+    const popover = $('#ai-status-popover');
+    if (!popover || popover.hidden) return;
+    if (!event.target.closest('#ai-status-container')) {
+      toggleAiPopover(false);
+    }
+  });
+
+  $('#open-profile-btn')?.addEventListener('click', () => openSettings('profile'));
+  $('#sidebar-settings-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#open-settings-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#close-settings-btn')?.addEventListener('click', closeSettings);
   $('#settings-modal')?.addEventListener('click', event => {
