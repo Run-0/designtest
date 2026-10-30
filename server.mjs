@@ -115,7 +115,7 @@ async function bodyOf(req) {
 export function createApp({ dataFile = join(ROOT, 'data', 'workspace.json'), aiDirectory = null, aiClient = null } = {}) {
   let state = load(dataFile);
   // aiClient 仅供自动化测试注入假模型；正常运行只按 aiDirectory 创建真实客户端。
-  const ai = aiClient ?? (aiDirectory ? createAiClient({ directory: aiDirectory }) : null);
+  const ai = aiClient ?? (aiDirectory ? createAiClient({ directory: aiDirectory, allowToppedUp: true }) : null);
   let aiOperation = false;
   const connectionStatus = () => {
     const budget = { limitCny: 1, reservedCny: 0, remainingCny: 1, attempts: 0 };

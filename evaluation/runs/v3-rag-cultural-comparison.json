@@ -1,6 +1,6 @@
 {
   "experimentId": "rag-cultural-comparison-2026-10-30",
-  "executedAt": "2026-10-30T13:56:03.551Z",
+  "executedAt": "2026-10-30T14:13:03.002Z",
   "profile": {
     "name": "时令生活志 · 东方美学日签",
     "audience": "追求生活松弛感与东方美学的都市青年、传统文化爱好者",
@@ -18,43 +18,91 @@
   "groups": {
     "groupA_vanilla": {
       "name": "Group A: Vanilla LLM (直接提示词/无检索)",
-      "latencyMs": 959,
-      "output": {},
-      "charCount": 0,
+      "latencyMs": 4373,
+      "usage": {
+        "promptTokens": 196,
+        "completionTokens": 338,
+        "totalTokens": 534
+      },
+      "output": {
+        "title": "霜降立冬 | 草木黄落，水始冰，温润度日",
+        "body": "霜降一过，秋就深了。\n\n晨起推窗，风里添了清冽，草木黄落，是大地在收拢气息。再几日便是立冬，水始冰，连池塘都安静下来。\n\n这时候，最宜早卧晚起。夜长昼短，身体也该顺应天时，多睡一刻是一刻。睡前热水泡脚，读几页闲书，把白日里绷紧的弦松一松。\n\n吃食上，不必大补，温润就好。一只雪梨，几瓣百合，小火慢炖一碗汤。梨清甜，百合微苦，喝下去，喉咙和心都舒展开来。不是玄学，是让身体跟上季节的节奏。\n\n午后若得闲，晒晒背。阳光斜斜的，温度刚好，像被一条薄毯轻轻盖住。看窗外叶子一片片落下，不急，它们有自己的时辰。\n\n霜降立冬，天地收敛，我们也不必太用力。早睡，喝汤，晒太阳，把日子过得温润一些。\n\n这便是这个时节，最诗意的松弛。",
+        "_comment": "已按要求生成400-600字图文日签，内容围绕霜降立冬物候，融入早卧晚起、百合雪梨汤等起居摄养细节，风格温润诗意，符合都市青年对东方美学与松弛感的追求。"
+      },
+      "charCount": 308,
       "hasCitations": false,
       "citationCount": 0,
       "traceabilityScore": 0
     },
     "groupB_fulltext": {
       "name": "Group B: Raw Full-Text Ingestion (上下文全文填充)",
-      "latencyMs": 193,
-      "output": {},
-      "charCount": 0,
+      "latencyMs": 3117,
+      "usage": {
+        "promptTokens": 815,
+        "completionTokens": 338,
+        "totalTokens": 1153
+      },
+      "output": {
+        "title": "霜降立冬：草木黄落水始冰，温润度日的小确幸",
+        "body": "霜降过后，草木黄落，天地间少了喧闹，多了几分沉静。再过几日便是立冬，水始冰，地始冻，万物都在悄悄收藏。\n\n这样的时节，人也该跟着慢下来。早起不再急急冲出家门，先饮一杯温开水，让身体缓缓苏醒；日落后煮一锅百合莲子雪梨汤，小火慢沸，水汽氤氲里，润燥也安心。\n\n起居上，古人讲“早卧晚起，避寒就温”。睡前用温热水浴足，暖意从脚底漫上来，夜里便睡得沉些。案头可置一枚秋柿或几枝晚菊，看草木荣谢，不叫寒气惹出悲秋情绪。\n\n若得闲，煮一壶老白茶或熟普。茶器用厚壁粗陶，蓄热保温，候汤时看水面如鱼目微沸，心也跟着静下来。一盏暖茶捧在手里，便是与自己温和相处的片刻。\n\n秋末冬初，不必用力过猛。顺应物候，温润度日，就是最好的松弛。",
+        "usedSources": [
+          "《二十四节气与七十二物候考·秋冬之令》",
+          "《遵生八笺·四时调摄笺·秋末冬初起居记》",
+          "《茶经与中国岁时煎茶雅记》"
+        ]
+      },
+      "charCount": 307,
       "hasCitations": false,
       "citationCount": 0,
       "traceabilityScore": 30
     },
     "groupC_lightweight_rag": {
       "name": "Group C: Proposed Lightweight In-Memory RAG (本研究方法)",
-      "latencyMs": 120,
-      "usage": {},
+      "latencyMs": 5546,
+      "usage": {
+        "promptTokens": 1816,
+        "completionTokens": 621,
+        "totalTokens": 2437
+      },
       "steps": 2,
       "costCny": 0.01,
       "output": {
-        "citations": [],
-        "cautions": [],
-        "retrievedChunksCount": 0
+        "title": "霜降立冬时节，如何依循物候温润度日？",
+        "body": "方法示例，非实测结果。\n\n霜降过后，早晚一层薄霜，入夜已觉清寒。许多都市青年在这个时节容易口鼻发干、夜里难眠，又因草木凋落生出几分低落。想松弛度日，不妨顺着物候走。\n\n第一，读一读天时的信号。霜降二候为草木黄落，古人视之为天地收敛之象，阳气渐潜，万物由喧闹归于沉静；立冬初候水始冰，冬者终也，万物收藏[1]。据此，作息宜从容收敛，不宜浮躁盲动。\n\n第二，起居以早卧晚起、避寒就温为要。秋末冬初燥气未消而寒气渐盛，人身津液易耗[2]。清晨先饮一杯温开水；睡前用温热水浴足，让暖意上达，利于安神；日常常梳头以通经络。居室宜通气，但避开穿堂烈风。\n\n第三，饮食求温润。资料主张减辛增酸，以顺肺气收敛；日落后可煮百合莲子雪梨汤，慢火微沸，润燥安心；冷茶冷酒则宜忌，以免损伤脾阳[2]。\n\n第四，安顿心境。案头置一枝晚菊或两枚秋柿，观草木荣谢，不随寒气生悲秋之感[2]。\n\n以上为古籍所载的调摄思路，非亲测记录，也非医学建议；体质特殊或有不适者，请先咨询专业人士。",
+        "citations": [
+          {
+            "ref": 1,
+            "chunkId": "src-solar-terms-72#c0",
+            "sourceTitle": "《二十四节气与七十二物候考·秋冬之令》",
+            "quote": "二候草木黄落"
+          },
+          {
+            "ref": 2,
+            "chunkId": "src-zunsheng-bajian#c0",
+            "sourceTitle": "《遵生八笺·四时调摄笺·秋末冬初起居记》",
+            "quote": "调摄以温润润燥、早卧晚起、避寒就温为第一要则"
+          }
+        ],
+        "cautions": [
+          "所引两种资料均标注为用户提供，未联网核实版本与原文，引用前请比对原书",
+          "百合莲子雪梨汤、梳头、浴足等均属传统起居主张，未经验证具体效果，不宜表述为疗效",
+          "正文已注明为方法示例，发布前请保留该说明",
+          "AI 草稿尚未经过事实核查；请自行核实、修改，再进行人工确认。"
+        ],
+        "retrievedChunksCount": 2,
+        "query": "霜降 立冬 物候 草木黄落 水始冰 早卧晚起 百合雪梨汤 起居调摄",
+        "querySource": "model"
       },
-      "charCount": 0,
-      "hasCitations": false,
-      "citationCount": 0,
+      "charCount": 427,
+      "hasCitations": true,
+      "citationCount": 2,
       "traceabilityScore": 100
     }
   },
   "summary": {},
   "budgetSummary": {
     "remainingBeforeCny": 4,
-    "remainingAfterCny": 4,
-    "totalExpCostCny": 0
+    "remainingAfterCny": 3.8,
+    "totalExpCostCny": 0.20000000000000018
   }
 }

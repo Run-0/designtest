@@ -218,6 +218,21 @@ test('生成前重新查询赠送余额：充值、不可用和不足均停止�
   assert.equal(f.requests.length, 6);
 });
 
+test('显式授权充值余额后允许使用：充值可用且满足单次预算时正常调用，不足仍停止', async t => {
+  const f = fixture(t);
+  f.options.allowToppedUp = true;
+  f.client = createAiClient(f.options);
+  await f.install();
+  // 充值余额 5.00，赠送 0，授权允许使用
+  f.balance = balance({ granted_balance: '0.00', topped_up_balance: '5.00' });
+  await f.client.chat(MESSAGES);
+  assert.equal(f.posts().length, 1);
+
+  // 充值余额 0.02，不足单次 0.05 预留，依然安全停止
+  f.balance = balance({ granted_balance: '0.00', topped_up_balance: '0.02' });
+  await assert.rejects(f.client.chat(MESSAGES), /可用账户余额不足/);
+});
+
 test('Authorization 仅交给 api.deepseek.com，所有请求禁止重定向', async t => {
   const f = fixture(t);
   await f.install();

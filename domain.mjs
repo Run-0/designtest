@@ -195,6 +195,12 @@ export function mutate(original, method, path, body = {}) {
       if (state.items.some(item => item.sourceIds.includes(source.id))) fail('该资料已被内容引用，不能删除。');
       state.sources = state.sources.filter(entry => entry.id !== source.id);
       event(state, 'source', `已删除资料「${source.title}」。`);
+    } else if (method === 'DELETE' && itemMatch && !itemMatch[2]) {
+      const item = state.items.find(entry => entry.id === itemMatch[1]);
+      if (!item) fail('内容不存在。', 404);
+      if (item.status === 'published') fail('已发布内容已计入发布历史与数据复盘，不能直接删除。');
+      state.items = state.items.filter(entry => entry.id !== item.id);
+      event(state, 'item_delete', `已删除选题「${item.title}」，已释放 ${item.estimatedMinutes} 分钟工时预算。`);
     } else if (itemMatch) {
       const item = state.items.find(entry => entry.id === itemMatch[1]);
       if (!item) fail('内容不存在。', 404);

@@ -654,3 +654,30 @@ test('任务归档与取消归档：归档任务不计入当前周工时预算�
   state = publish(state, item2.id);
   rejects(state, 'POST', itemPath(item2.id, 'archive'), {}, 400);
 });
+
+test('选题删除：未发布选题可删除并释放工时预算，已发布选题禁止删除', () => {
+  let state = mutate(createInitialState(), 'POST', '/api/plan', { count: 2 });
+  const [item1, item2] = state.items;
+  assert.equal(state.items.length, 2);
+  let budget = calculateTimeBudget(state);
+  assert.equal(budget.usedMinutes, 80);
+
+  // 删除未发布选题 item1
+  state = mutate(state, 'DELETE', `/api/items/${item1.id}`);
+  assert.equal(state.items.length, 1);
+  assert.equal(state.items.find(i => i.id === item1.id), undefined);
+  budget = calculateTimeBudget(state);
+  assert.equal(budget.usedMinutes, 40);
+  assert.equal(budget.remainingMinutes, 140);
+  assert.ok(state.events.some(e => e.type === 'item_delete' && e.message.includes('已删除选题')));
+
+  // 删除不存在的选题返回 404
+  assert.throws(() => mutate(state, 'DELETE', '/api/items/non-existent-id'), { status: 404 });
+
+  // 已发布选题不能删除
+  state = mutate(state, 'PATCH', `/api/items/${item2.id}`, { body: '合法正文内容用于测试发布' });
+  state = mutate(state, 'POST', `/api/items/${item2.id}/review`);
+  state = mutate(state, 'POST', `/api/items/${item2.id}/approve`);
+  state = mutate(state, 'POST', `/api/items/${item2.id}/publish`, { url: 'https://xiaohongshu.com/discovery/item/12345' });
+  assert.throws(() => mutate(state, 'DELETE', `/api/items/${item2.id}`), { status: 400 });
+});

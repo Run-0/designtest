@@ -27,8 +27,8 @@ const task = {
   angle: '结合草木黄落与水始冰物候，谈秋末冬初起居调摄、早卧晚起与百合雪梨汤，给都市人一份诗意松弛日签。',
 };
 
-// 初始化真实 AI 客户端
-const ai = createAiClient({ directory: join(ROOT, '.local') });
+// 初始化真实 AI 客户端（用户已明确授权使用充值余额用于实验，仍严格遵循本机预算账本上限）
+const ai = createAiClient({ directory: join(ROOT, '.local'), allowToppedUp: true });
 const statusBefore = ai.status();
 console.log('=== 实验准备 ===');
 console.log(`模型: ${statusBefore.model || 'DeepSeek'}`);

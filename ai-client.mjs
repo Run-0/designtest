@@ -99,7 +99,7 @@ function dpapi(value, decrypt = false) {
   return result.stdout.trim();
 }
 
-export function createAiClient({ directory, fetchImpl = fetch, protect = value => dpapi(value), unprotect = value => dpapi(value, true), clock = () => Date.now() }) {
+export function createAiClient({ directory, fetchImpl = fetch, protect = value => dpapi(value), unprotect = value => dpapi(value, true), clock = () => Date.now(), allowToppedUp = false }) {
   mkdirSync(directory, { recursive: true });
   const keyFile = join(directory, 'deepseek-key.dpapi.json');
   const budgetFile = join(directory, 'ai-budget.json');
@@ -175,9 +175,11 @@ export function createAiClient({ directory, fetchImpl = fetch, protect = value =
     const amount = value => typeof value === 'string' && /^\d+(?:\.\d+)?$/.test(value) ? Number(value) : NaN;
     const granted = amount(cny?.granted_balance);
     const topped = amount(cny?.topped_up_balance);
-    if (balance?.is_available !== true || !cny || !Number.isFinite(granted) || !Number.isFinite(topped)) throw new InputError('无法确认可用赠送余额，已暂停模型生成。');
-    if (topped !== 0) throw new InputError('本次仅授权使用赠送余额；检测到充值余额后暂停，请重新确认资金边界。');
-    if (granted < RESERVE_CENTS / 100) throw new InputError('可用赠送余额不足单次保守预算，已停止，不会充值。');
+    if (balance?.is_available !== true || !cny || !Number.isFinite(granted) || !Number.isFinite(topped)) throw new InputError('无法确认可用余额，已暂停模型生成。');
+    const isToppedAllowed = allowToppedUp || ledger?.allowToppedUp === true;
+    if (!isToppedAllowed && topped !== 0) throw new InputError('本次仅授权使用赠送余额；检测到充值余额后暂停，请重新确认资金边界。');
+    const totalAvailable = isToppedAllowed ? (granted + topped) : granted;
+    if (totalAvailable < RESERVE_CENTS / 100) throw new InputError('可用账户余额不足单次保守预算，已停止，不会自动充值。');
     return { grantedCny: granted, toppedUpCny: topped };
   }
   async function installKey(value, options = {}) {
