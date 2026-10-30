@@ -47,87 +47,17 @@
     <p class="nav-caption">工作空间</p>
     <nav class="nav-list">
       <a href="#overview" data-page="overview" class="nav-link active" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span>工作台</span></a>
-      <a href="#studio" data-page="content" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><span>内容中心</span></a>
       <a href="#studio" data-page="studio" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><span>创作空间</span></a>
       <a href="#sources" data-page="sources" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>知识库</span></a>
       <a href="#report" data-page="report" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg><span>数据复盘</span></a>
+      <a href="#settings" data-page="settings" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span>系统设置</span></a>
     </nav>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-secondary-nav">
-      <button class="nav-link nav-btn" id="sidebar-settings-btn" type="button">
-        <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
-        <span>系统设置</span>
-      </button>
-    </div>
     <div class="sidebar-bottom">
       <div class="small-note"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><strong>小步推进，也是一种效率。</strong><p>先完成一条真实内容，<br>再让下一条更好。</p></div>
     </div>
   </aside>
 
   <div class="app-shell">
-    <header class="topbar">
-      <div class="breadcrumb">
-        <span class="brand-crumb">🌿 Solo Workbench</span>
-        <span class="crumb-sep">/</span>
-        <strong id="breadcrumb-current">工作台</strong>
-      </div>
-      <div class="topbar-right">
-        <div class="ai-status-container" id="ai-status-container">
-          <button class="mode-badge" id="mode-badge" type="button" aria-haspopup="dialog" aria-expanded="false" title="点击查看 AI 状态与安全详情">
-            AI状态读取中 · 已禁用
-          </button>
-          <div class="ai-status-popover" id="ai-status-popover" hidden role="dialog" aria-label="AI 连接与安全状态">
-            <div class="popover-header">
-              <div class="popover-title">
-                <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
-                <strong>本机 AI 保护与连接状态</strong>
-              </div>
-              <button class="popover-close" id="close-ai-popover" type="button" aria-label="关闭详情">✕</button>
-            </div>
-            <div class="popover-body">
-              <div class="popover-row">
-                <span class="popover-row-label">保护检查</span>
-                <p id="connection-message" role="status">正在只读检查本机 AI 保护状态。</p>
-              </div>
-              <div class="popover-row">
-                <span class="popover-row-label">价格核验</span>
-                <p id="connection-times">价格核验到期时间暂未读取。</p>
-              </div>
-              <div class="popover-row">
-                <span class="popover-row-label">测试预算</span>
-                <p id="connection-budget">测试预算读取中。</p>
-              </div>
-              <div class="connection-tools">
-                <button class="btn btn-small btn-secondary" id="refresh-ai-status" type="button">
-                  <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 刷新 AI 状态
-                </button>
-                <span class="popover-hint">只读、不调用模型；30 秒后需重新检查。</span>
-              </div>
-              <div class="popover-notes">
-                <p>💡 可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
-                <p id="scope-notice-text">计划为 5 个内置模板，检查为程序规则，复盘为手工指标报告；不爬取、不接平台账号、不自动发布。</p>
-              </div>
-              <div class="popover-footer">
-                <button class="btn btn-small btn-primary full-width" id="popover-settings-btn" type="button">
-                  配置 AI 模型与安全密钥 →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button class="topbar-btn" type="button" data-go="sources" title="查看知识库资料">
-          <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>
-          <span>知识库</span>
-        </button>
-        <button class="topbar-btn" id="open-settings-btn" type="button" title="打开全局设置">
-          <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
-          <span>设置</span>
-        </button>
-        <button class="user-avatar-btn" id="open-profile-btn" type="button" title="账号与人设工作底稿">
-          <span class="avatar-circle">一</span>
-        </button>
-      </div>
-    </header>
     <main id="main-content" tabindex="-1">
       <div id="boot-state" class="boot-state" role="status"><span class="loader" aria-hidden="true"></span><h1>正在打开你的工作空间</h1><p>读取本地内容与资料，不会连接外部平台。</p></div>
       <div id="boot-error" class="panel boot-error" hidden role="alert"><h1>暂时没有连接到本地服务</h1><p id="boot-error-message"></p><button class="btn btn-primary" id="retry-state" type="button">重新连接</button></div>
@@ -296,7 +226,7 @@
                       <button class="btn btn-quiet" id="export-draft" type="button">
                         <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> <span>导出 TXT</span>
                       </button>
-                      <button class="btn btn-quiet" id="archive-draft-btn" type="button">
+                      <button class="btn btn-quiet" id="archive-draft-btn" type="button" title="移入归档，从主队列隐去并释放本周工时预算">
                         <span>📦 移入归档</span>
                       </button>
                     </div>
@@ -368,12 +298,135 @@
           <div id="report-results"><div id="report-stats" class="stats-grid report-stats"></div><div class="report-insights"><section class="panel" aria-labelledby="insights-title"><div class="panel-heading"><h2 id="insights-title">这次数据告诉我们什么</h2><span class="mini-tag">规则建议</span></div><p id="sample-note" class="sample-note"></p><ul id="recommendations" class="recommendation-list"></ul><div id="best-item" class="best-item" hidden></div></section><section class="panel metrics-panel" aria-labelledby="metrics-title"><div class="panel-heading"><h2 id="metrics-title">录入真实数据</h2><span class="mini-tag">手工填写</span></div><p class="muted form-intro">请在平台查看实际累计数据后填写；再次保存会替换上次记录，不会相加。</p><form id="metrics-form" data-track><label class="field">已登记发布的内容<select name="itemId" id="metrics-item" required></select></label><div class="form-grid metrics-grid"><label class="field">浏览量<input name="views" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际浏览次数"></label><label class="field">点赞数<input name="likes" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际点赞次数"></label><label class="field">评论数<input name="comments" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际评论条数"></label><label class="field">收藏数<input name="saves" type="number" min="0" max="1000000000" step="1" required inputmode="numeric" placeholder="实际收藏次数"></label></div><p id="metrics-last-recorded" class="tiny muted"></p><p class="form-error" id="metrics-error" role="alert" hidden></p><button class="btn btn-primary full-width" id="save-metrics" type="submit">保存实际数据</button></form><p class="muted" id="metrics-empty" hidden>还没有登记发布的内容。请先在内容工作台完成检查、人工确认与发布网址登记。</p></section></div><section class="panel report-table-panel" aria-labelledby="report-table-title"><div class="panel-heading"><h2 id="report-table-title">逐条内容表现</h2><span class="muted tiny">只展示已录入数据的内容</span></div><div class="table-scroll" tabindex="0" role="region" aria-label="逐条内容表现表，可横向滚动"><table><caption class="sr-only">手工录入的内容数据与按互动次数计算的比率</caption><thead><tr><th scope="col">内容</th><th scope="col">浏览</th><th scope="col">点赞</th><th scope="col">评论</th><th scope="col">收藏</th><th scope="col">互动率</th></tr></thead><tbody id="report-rows"></tbody></table></div></section></div>
         </section>
 
-        <section id="page-roadmap" class="page" hidden aria-labelledby="roadmap-title">
-          <div class="page-heading"><div><p class="eyebrow">把能演示的第一版，做成有证据的毕业设计</p><h1 id="roadmap-title" tabindex="-1">毕设路线<span class="heading-dot">。</span></h1><p class="page-subtitle">先跑通小闭环，再接入模型，最后用实验说明价值。</p></div><span class="page-chip">8 周 · 小步验收</span></div>
-          <section class="panel thesis-brief"><span class="tiny-label">毕业设计题目</span><h2>面向一人公司的 AI 运营智能体设计与实现</h2><div class="thesis-facts"><p><strong>服务谁</strong>独立内容创作者，一个人完成选题、写作与复盘。</p><p><strong>默认场景</strong>小红书效率工具图文账号；这是助手的可调整假设，不是已经确定的业务结论。</p><p><strong>核心边界</strong>人掌握发布与事实判断，不接发布平台账号、不自动发布、不爬取；不声称平台授权，不保证涨粉。</p></div></section>
-          <div class="capability-grid"><section class="panel capability-card"><span class="capability-label is-ready">当前第一版 · 已有本地流程</span><h2>本地流程与可配置的 AI 草稿</h2><ul class="plain-list"><li>工作底稿、手动资料与 5 个内置选题模板</li><li>免费模板起草；AI 草稿需配置并逐次确认</li><li>版本编辑、规则检查与人工确认</li><li>发布网址登记、手工指标规则复盘与本地备份</li></ul><p class="tiny muted">AI草稿连接状态见顶部；完整检索评测与自主规划仍未实现。配置完成不代表每次调用成功，也不代表完整智能体。</p></section><section class="panel capability-card"><span class="capability-label is-next">后续毕业设计 · 待实现与评测</span><h2>完整检索与自主规划，需要验证</h2><ul class="plain-list"><li>模型质量、失败处理与预算控制评测</li><li>语义资料检索、引用追溯及检索效果评测</li><li>自主规划与更完整的受约束工具流程</li><li>对照实验、真实费用核对与论文证据</li></ul><p class="tiny muted">目前没有模型事实核查、自动抓取、平台连接或效果承诺。</p></section></div>
-          <section class="section-block" aria-labelledby="weeks-title"><div class="section-heading"><h2 id="weeks-title">两个月，每周只推进一个重点</h2><span class="muted tiny">建议安排，可按实际进度调整</span></div><ol class="week-grid"><li><span>第 01 周</span><h3>界定问题</h3><p>确定用户与业务场景，整理需求和验收清单。</p></li><li><span>第 02 周</span><h3>跑通本地闭环</h3><p>用真实资料完成一条内容，验证预算与人工节点。</p></li><li><span>第 03 周</span><h3>接入真实模型</h3><p>服务端配置模型，记录调用、错误与实际费用。</p></li><li><span>第 04 周</span><h3>补齐资料检索</h3><p>实现检索与引用，准备带依据的测试问题。</p></li><li><span>第 05 周</span><h3>完善受控流程</h3><p>约束工具调用、状态流转、版本检查和异常恢复。</p></li><li><span>第 06 周</span><h3>运行对照实验</h3><p>固定任务与评分规则，对比三种工作方式。</p></li><li><span>第 07 周</span><h3>分析与写作</h3><p>整理真实日志、失败案例、架构与实验结果。</p></li><li><span>第 08 周</span><h3>测试与答辩</h3><p>修复问题，备份数据，准备可重复的现场演示。</p></li></ol></section>
-          <section class="panel experiment-panel" aria-labelledby="experiment-title"><div class="panel-heading"><h2 id="experiment-title">怎么证明它有用？做一组公平对照</h2><span class="mini-tag">实验设计，不是现有结果</span></div><p class="muted">用同一组内容任务、同一模型与参数，统一时间边界和人工评分标准；多次试验，保留原始输出与人工修改记录。</p><div class="experiment-grid"><div><span class="experiment-letter">A</span><h3>普通提示</h3><p>只提供任务与账号要求，直接向模型提问。</p></div><div><span class="experiment-letter">B</span><h3>资料辅助</h3><p>在相同要求上提供参考资料，观察引用与事实表现。</p></div><div><span class="experiment-letter">C</span><h3>完整工具流程</h3><p>加入预算计划、检索、检查与人工确认，比较完整任务成本。</p></div></div><div class="experiment-metrics"><div><strong>事实错误</strong><span>人工对照来源，统计错误条数及其占比。</span></div><div><strong>约束满足率</strong><span>满足的预设要求数 ÷ 要求总数。</span></div><div><strong>人工耗时</strong><span>从开始任务到可发布内容的实际人工分钟数。</span></div><div><strong>调用成本</strong><span>记录真实模型用量与费用，不虚构零成本。</span></div></div><p class="method-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>当前本地流程与单次 AI 草稿结果不能替代上述实验。发布互动数据用于运营观察，不足以证明 AI 带来增长；先积累样本，再谨慎下结论。</p></section>
+        <!-- 系统设置：全新一级页面（纵向侧边子导航与归档管理） -->
+        <section id="page-settings" class="page" hidden aria-labelledby="settings-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">配置创作人设、模型密件箱与归档选题</p>
+              <h1 id="settings-title" tabindex="-1">系统设置<span class="heading-dot">。</span></h1>
+              <p class="page-subtitle">管理账号人设底稿、大语言模型密件箱与已归档选题库，支持安全恢复与彻底删除。</p>
+            </div>
+            <span class="page-chip" id="settings-badge-chip">系统设置</span>
+          </div>
+
+          <div class="settings-layout">
+            <!-- 左侧纵向子导航 -->
+            <aside class="settings-sidebar" aria-label="设置导航">
+              <nav class="settings-nav">
+                <button class="settings-nav-item active" id="settings-tab-profile" type="button" data-settings-tab="profile">
+                  <div class="settings-nav-text">
+                    <strong>账号人设底稿</strong>
+                    <small>定位、受众与工时预算</small>
+                  </div>
+                </button>
+                <button class="settings-nav-item" id="settings-tab-ai" type="button" data-settings-tab="ai">
+                  <div class="settings-nav-text">
+                    <strong>AI 模型与安全密件箱</strong>
+                    <small>DPAPI 密钥加密与服务商</small>
+                  </div>
+                </button>
+                <button class="settings-nav-item" id="settings-tab-archived" type="button" data-settings-tab="archived">
+                  <div class="settings-nav-text">
+                    <strong>归档任务管理</strong>
+                    <small id="archived-tasks-caption">已归档 0 个选题</small>
+                  </div>
+                  <span class="settings-badge" id="archived-tasks-badge">0</span>
+                </button>
+              </nav>
+            </aside>
+
+            <!-- 右侧面板区 -->
+            <div class="settings-content">
+              <!-- Panel 1: 人设底稿 -->
+              <div id="settings-pane-profile" class="settings-pane">
+                <section class="panel">
+                  <div class="panel-heading">
+                    <h2>账号人设底稿</h2>
+                    <span class="mini-tag">确定性工时约束依据</span>
+                  </div>
+                  <p class="muted form-intro">设置你的创作定位与每周可用工时。工时由智能体在规划时作为严格上限约束。</p>
+                  <form id="modal-profile-form" data-track>
+                    <div class="form-grid">
+                      <label class="field">工作空间 / 账号名称<input name="name" required maxlength="80" autocomplete="off"></label>
+                      <label class="field">内容平台<input name="platform" required maxlength="100" placeholder="例如：小红书（图文）"></label>
+                      <label class="field">目标受众<input name="audience" required maxlength="300" placeholder="例如：追求生活松弛感与东方美学的都市青年"></label>
+                      <label class="field">表达语气<input name="tone" required maxlength="300" placeholder="例如：温润、诗意、克制、真实，杜绝虚构与玄学"></label>
+                      <label class="field field-wide">内容定位<textarea name="positioning" required rows="2" maxlength="600"></textarea></label>
+                      <label class="field">每周可投入时间（小时）<input name="weeklyHours" type="number" min="1" max="40" step="1" required inputmode="numeric"><small>一条计划预计 40 分钟，优先量力而行。</small></label>
+                      <label class="field">当前目标<input name="goal" required maxlength="600" placeholder="例如：每周完成 3 篇有古籍与物候依据的时令生活美学日签"></label>
+                    </div>
+                    <p class="form-error" id="modal-profile-error" role="alert" hidden></p>
+                    <div class="panel-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                      <span class="muted tiny">保存在服务端本地工作区。</span>
+                      <button class="btn btn-primary" type="submit">保存人设底稿</button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+
+              <!-- Panel 2: AI 模型密件箱 -->
+              <div id="settings-pane-ai" class="settings-pane" hidden>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <h2>AI 模型与安全密件箱</h2>
+                    <span class="mini-tag">Windows DPAPI 系统底层加密</span>
+                  </div>
+                  <p class="muted form-intro">配置大语言模型接口，私钥仅保存在本机并经 Windows DPAPI 加密，绝不上云、不写明文日志。</p>
+                  <form id="ai-key-form">
+                    <div class="form-grid">
+                      <label class="field">
+                        <span>1. 模型服务提供商 (Provider)</span>
+                        <select id="ai-provider-select">
+                          <option value="DeepSeek" selected>DeepSeek (默认推荐)</option>
+                          <option value="OpenAI">OpenAI</option>
+                          <option value="Gemini">Google Gemini</option>
+                          <option value="Custom">自定义兼容接口</option>
+                        </select>
+                      </label>
+                      <label class="field">
+                        <span>2. 选用模型型号 (Model)</span>
+                        <input id="ai-model-input" value="deepseek-flash" required maxlength="100">
+                      </label>
+                      <label class="field field-wide">
+                        <span>3. 接口地址 (Base URL)</span>
+                        <input id="ai-baseurl-input" value="https://api.deepseek.com" required maxlength="250">
+                      </label>
+                      <label class="field field-wide">
+                        <span>4. API Key (密钥)</span>
+                        <input id="ai-key-input" type="password" required maxlength="250" placeholder="粘贴 API Key...">
+                        <small class="field-hint" style="margin-top:4px;">密钥申请链接：<a id="ai-key-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">https://platform.deepseek.com/api_keys ↗</a></small>
+                      </label>
+                    </div>
+                    <div class="security-notes">
+                      <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
+                      <div>
+                        <strong>本机高强度安全防护机制：</strong>
+                        <p>· 采用 Windows DPAPI 系统底层加密，锁定本机当前登录用户；</p>
+                        <p>· 服务端与前端绝不暴露密钥明文，绝不上云、不写日志；</p>
+                        <p>· 保存前自动执行官方只读探测，探测成功后方可安全存盘。</p>
+                      </div>
+                    </div>
+                    <p class="form-error" id="ai-key-feedback" role="alert" hidden></p>
+                    <div class="panel-footer" style="display:flex; justify-content:flex-end; margin-top:20px;">
+                      <button class="btn btn-primary" id="save-ai-key-btn" type="submit">探测有效性并安全保存</button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+
+              <!-- Panel 3: 归档任务管理 -->
+              <div id="settings-pane-archived" class="settings-pane" hidden>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <h2>归档任务管理</h2>
+                    <span class="page-chip" id="archived-count-chip">0 条归档</span>
+                  </div>
+                  <p class="muted form-intro">已归档的选题不会在「创作空间」的活跃任务列表中展示，也不计入本周工时预算。你可以在这里将它们恢复到任务队列，或者确认彻底删除。</p>
+                  <div id="archived-list" class="archived-list"></div>
+                </section>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </main>
@@ -383,6 +436,50 @@
           <span class="status-dot"></span>
           <span id="statusbar-system-status">系统状态：本地运行正常</span>
         </span>
+        <span class="statusbar-sep">·</span>
+        <div class="ai-status-container" id="ai-status-container">
+          <button class="mode-badge" id="mode-badge" type="button" aria-haspopup="dialog" aria-expanded="false" title="点击查看 AI 状态与安全详情">
+            AI状态读取中 · 已禁用
+          </button>
+          <div class="ai-status-popover" id="ai-status-popover" hidden role="dialog" aria-label="AI 连接与安全状态">
+            <div class="popover-header">
+              <div class="popover-title">
+                <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
+                <strong>本机 AI 保护与连接状态</strong>
+              </div>
+              <button class="popover-close" id="close-ai-popover" type="button" aria-label="关闭详情">✕</button>
+            </div>
+            <div class="popover-body">
+              <div class="popover-row">
+                <span class="popover-row-label">保护检查</span>
+                <p id="connection-message" role="status">正在只读检查本机 AI 保护状态。</p>
+              </div>
+              <div class="popover-row">
+                <span class="popover-row-label">价格核验</span>
+                <p id="connection-times">价格核验到期时间暂未读取。</p>
+              </div>
+              <div class="popover-row">
+                <span class="popover-row-label">测试预算</span>
+                <p id="connection-budget">测试预算读取中。</p>
+              </div>
+              <div class="connection-tools">
+                <button class="btn btn-small btn-secondary" id="refresh-ai-status" type="button">
+                  <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 刷新 AI 状态
+                </button>
+                <span class="popover-hint">只读、不调用模型；30 秒后需重新检查。</span>
+              </div>
+              <div class="popover-notes">
+                <p>💡 可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
+                <p id="scope-notice-text">计划为 5 个内置模板，检查为程序规则，复盘为手工指标报告；不爬取、不接平台账号、不自动发布。</p>
+              </div>
+              <div class="popover-footer">
+                <button class="btn btn-small btn-primary full-width" id="popover-settings-btn" type="button">
+                  配置 AI 模型与安全密钥 →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <span class="statusbar-sep">·</span>
         <span class="security-indicator">
           <svg class="icon-tiny" aria-hidden="true"><use href="#i-shield"/></svg>
@@ -396,89 +493,8 @@
           <svg class="icon-tiny" aria-hidden="true"><use href="#i-download"/></svg>
           <span>导出 JSON 备份</span>
         </a>
-        <span class="statusbar-sep">·</span>
-        <a href="#roadmap" data-page="roadmap" class="statusbar-link statusbar-roadmap-link">毕设路线说明</a>
       </div>
     </footer>
-  </div>
-
-  <div id="settings-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settings-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2 id="settings-title">⚙️ 全局设置</h2>
-        <button class="modal-close" id="close-settings-btn" type="button" aria-label="关闭设置">✕</button>
-      </div>
-      <div class="modal-tabs">
-        <button class="modal-tab-btn active" id="modal-tab-profile" type="button">👤 账号人设底稿</button>
-        <button class="modal-tab-btn" id="modal-tab-ai" type="button">🤖 AI 模型与安全密件箱 🔒</button>
-      </div>
-      <div class="modal-body">
-        <!-- Tab 1: Profile Pane -->
-        <div id="modal-pane-profile" class="modal-pane">
-          <p class="muted tiny modal-intro">设置你的创作定位与每周可用工时。工时由智能体在规划时作为严格上限约束。</p>
-          <form id="modal-profile-form" data-track>
-            <div class="form-grid">
-              <label class="field">工作空间 / 账号名称<input name="name" required maxlength="80" autocomplete="off"></label>
-              <label class="field">内容平台<input name="platform" required maxlength="100" placeholder="例如：小红书（图文）"></label>
-              <label class="field">目标受众<input name="audience" required maxlength="300" placeholder="例如：希望提升效率的独立创作者"></label>
-              <label class="field">表达语气<input name="tone" required maxlength="300" placeholder="例如：真诚、简洁、不夸大效果"></label>
-              <label class="field field-wide">内容定位<textarea name="positioning" required rows="2" maxlength="600"></textarea></label>
-              <label class="field">每周可投入时间（小时）<input name="weeklyHours" type="number" min="1" max="40" step="1" required inputmode="numeric"><small>一条计划预计 40 分钟，优先量力而行。</small></label>
-              <label class="field">当前目标<input name="goal" required maxlength="600" placeholder="例如：每周完成 3 篇有资料依据的内容"></label>
-            </div>
-            <p class="form-error" id="modal-profile-error" role="alert" hidden></p>
-            <div class="modal-footer">
-              <span class="muted tiny">保存在服务端本地工作区。</span>
-              <button class="btn btn-primary" type="submit">保存人设底稿</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Tab 2: AI Multi-provider & Secret Box -->
-        <div id="modal-pane-ai" class="modal-pane" hidden>
-          <form id="ai-key-form">
-            <div class="form-grid">
-              <label class="field">
-                <span>1. 模型服务提供商 (Provider)</span>
-                <select id="ai-provider-select">
-                  <option value="DeepSeek" selected>DeepSeek (默认推荐)</option>
-                  <option value="OpenAI">OpenAI</option>
-                  <option value="Gemini">Google Gemini</option>
-                  <option value="Custom">自定义兼容接口</option>
-                </select>
-              </label>
-              <label class="field">
-                <span>2. 选用模型型号 (Model)</span>
-                <input id="ai-model-input" value="deepseek-flash" required maxlength="100">
-              </label>
-              <label class="field field-wide">
-                <span>3. 接口地址 (Base URL)</span>
-                <input id="ai-baseurl-input" value="https://api.deepseek.com" required maxlength="250">
-              </label>
-              <label class="field field-wide">
-                <span>4. API Key (密钥)</span>
-                <input id="ai-key-input" type="password" required maxlength="250" placeholder="粘贴 API Key...">
-                <small class="field-hint" style="margin-top:4px;">密钥申请链接：<a id="ai-key-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">https://platform.deepseek.com/api_keys ↗</a></small>
-              </label>
-            </div>
-            <div class="security-notes">
-              <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
-              <div>
-                <strong>🛡️ 本机高强度安全防护机制：</strong>
-                <p>· 采用 Windows DPAPI 系统底层加密，锁定本机当前登录用户；</p>
-                <p>· 服务端与前端绝不暴露密钥明文，绝不上云、不写日志；</p>
-                <p>· 保存前自动执行官方只读探测，探测成功后方可安全存盘。</p>
-              </div>
-            </div>
-            <p class="form-error" id="ai-key-feedback" role="alert" hidden></p>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" id="cancel-ai-key-btn" type="button">取消</button>
-              <button class="btn btn-primary" id="save-ai-key-btn" type="submit">🔍 探测有效性并安全保存</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>

@@ -136,7 +136,7 @@ export class AiConnectionStatus {
   if (!document.querySelector('#main-content')) return;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-  const pageNames = { overview: '工作台', studio: '创作空间', sources: '知识库', report: '数据复盘', roadmap: '毕设路线' };
+  const pageNames = { overview: '工作台', studio: '创作空间', sources: '知识库', report: '数据复盘', settings: '系统设置' };
   const statusNames = { idea: '待起草', draft: '草稿', reviewed: '已检查', approved: '待发布', published: '已登记发布' };
   const PROVIDER_METAS = {
     DeepSeek: {
@@ -474,6 +474,7 @@ export class AiConnectionStatus {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
     if (page === 'report' && state && !report && !reportLoading) loadReport();
+    if (page === 'settings' && state) renderSettings();
     return true;
   }
 
@@ -571,8 +572,9 @@ export class AiConnectionStatus {
   function renderFilters() {
     const filters = $('#status-filters');
     filters.replaceChildren();
+    const unarchived = state.items.filter(item => !item.archived);
     Object.entries({ all: '全部', ...statusNames }).forEach(([value, label]) => {
-      const count = value === 'all' ? state.items.length : state.items.filter(item => item.status === value).length;
+      const count = value === 'all' ? unarchived.length : unarchived.filter(item => item.status === value).length;
       const control = button('', 'filter-button' + (ui.filter === value ? ' active' : ''), () => {
         if (busy) return;
         ui.filter = value;
@@ -591,12 +593,13 @@ export class AiConnectionStatus {
   function renderContentList() {
     const list = $('#content-list');
     list.replaceChildren();
-    const items = newest(state.items).filter(item => ui.filter === 'all' || item.status === ui.filter);
+    const unarchived = newest(state.items).filter(item => !item.archived);
+    const items = unarchived.filter(item => ui.filter === 'all' || item.status === ui.filter);
     if (!items.length) {
-      const title = state.items.length ? '这个状态下还没有内容' : '先计划一条，让创作开始';
-      const description = state.items.length ? '切换到其他状态，或创建新的内容计划。正在编辑的内容会继续保留。' : '选择上方计划数量，点击「生成模板计划」。每条预计 40 分钟，请量力而行。';
-      list.append(emptyState(title, description, 'pen', state.items.length ? '查看全部内容' : '设置计划数量', () => {
-        if (state.items.length) { ui.filter = 'all'; renderFilters(); renderContentList(); }
+      const title = unarchived.length ? '这个状态下还没有内容' : '先计划一条，让创作开始';
+      const description = unarchived.length ? '切换到其他状态，或创建新的内容计划。正在编辑的内容会继续保留。' : '选择上方计划数量，点击「生成模板计划」。每条预计 40 分钟，请量力而行。';
+      list.append(emptyState(title, description, 'pen', unarchived.length ? '查看全部内容' : '设置计划数量', () => {
+        if (unarchived.length) { ui.filter = 'all'; renderFilters(); renderContentList(); }
         else $('#plan-count').focus();
       }));
       return;
@@ -605,12 +608,12 @@ export class AiConnectionStatus {
       const card = button('', 'content-card' + (item.id === ui.selectedId ? ' selected' : ''), () => openItem(item.id));
       card.setAttribute('aria-pressed', String(item.id === ui.selectedId));
       const top = el('span', 'content-card-top');
-      top.append(el('span', 'content-card-index', '内容 ' + String(index + 1).padStart(2, '0')), statusPill(item.status));
+      const cardIndex = el('span', 'content-card-index', '内容 ' + String(index + 1).padStart(2, '0'));
+      top.append(cardIndex, statusPill(item.status));
       const foot = el('span', 'content-card-foot');
       const estimate = el('span');
       estimate.append(icon('clock'), document.createTextNode('预计 ' + number(item.estimatedMinutes) + ' 分钟'));
       foot.append(estimate, el('span', '', '第 ' + number(item.revision) + ' 版'));
-      if (item.archived) foot.append(el('span', 'status-pill', '📦 已归档'));
       card.append(top, el('h3', '', item.title));
       if (item.angle) card.append(el('p', '', item.angle));
       if (item.reason) card.append(el('p', 'content-reason', '选题理由：' + item.reason));
@@ -797,7 +800,7 @@ export class AiConnectionStatus {
     text('#export-draft span', dirty ? '保存后导出 TXT' : '导出 TXT');
     if ($('#archive-draft-btn')) {
       $('#archive-draft-btn').hidden = published;
-      text('#archive-draft-btn span', item.archived ? '📦 移出归档（计入本周）' : '📦 移入归档（不占本周）');
+      text('#archive-draft-btn span', '📦 移入归档（不占本周）');
     }
     $('#review-draft').disabled = published || !validText;
     text('#review-draft', dirty ? '保存并规则检查' : '运行规则检查');
@@ -1357,9 +1360,12 @@ export class AiConnectionStatus {
     runAction(event.currentTarget, '#editor-error', async () => {
       await saveEditorIfDirty();
       const current = currentItem();
-      const action = current.archived ? 'unarchive' : 'archive';
-      await writeState('/api/items/' + encodeURIComponent(current.id) + '/' + action, 'POST', {}, { editorRefresh: true });
-      showToast(current.archived ? '已移出归档，重新计入本周工时预算' : '已移入归档，不再计入本周工时预算');
+      await writeState('/api/items/' + encodeURIComponent(current.id) + '/archive', 'POST', {}, { editorRefresh: true });
+      ui.selectedId = null;
+      ui.renderedId = null;
+      showToast(`已将「${current.title}」移入归档，已从活跃任务列表中隐去`);
+      renderStudio();
+      renderArchivedList();
     });
   });
 
@@ -1509,9 +1515,32 @@ export class AiConnectionStatus {
   });
 
   function openSettings(tab = 'profile') {
-    $('#settings-modal').hidden = false;
+    navigate('settings');
     switchSettingsTab(tab);
+    renderSettings();
+  }
+
+  function switchSettingsTab(tab) {
+    const validTabs = ['profile', 'ai', 'archived'];
+    const activeTab = validTabs.includes(tab) ? tab : 'profile';
+    validTabs.forEach(t => {
+      const btn = $(`#settings-tab-${t}`);
+      const pane = $(`#settings-pane-${t}`);
+      if (btn) btn.classList.toggle('active', t === activeTab);
+      if (pane) pane.hidden = t !== activeTab;
+    });
+    if (activeTab === 'archived') {
+      renderArchivedList();
+    }
+  }
+
+  function renderSettings() {
     fillModalProfile();
+    fillAiSettings();
+    renderArchivedList();
+  }
+
+  function fillAiSettings() {
     const prov = aiConnection.data?.provider || 'DeepSeek';
     const select = $('#ai-provider-select');
     if (select) {
@@ -1531,17 +1560,73 @@ export class AiConnectionStatus {
       }
     }
   }
-  function closeSettings() {
-    $('#settings-modal').hidden = true;
-    setError('#modal-profile-error', '');
-    setError('#ai-key-feedback', '');
-  }
-  function switchSettingsTab(tab) {
-    const isProfile = tab === 'profile';
-    $('#modal-tab-profile')?.classList.toggle('active', isProfile);
-    $('#modal-tab-ai')?.classList.toggle('active', !isProfile);
-    if ($('#modal-pane-profile')) $('#modal-pane-profile').hidden = !isProfile;
-    if ($('#modal-pane-ai')) $('#modal-pane-ai').hidden = isProfile;
+
+  function renderArchivedList() {
+    const container = $('#archived-list');
+    if (!container || !state?.items) return;
+    container.replaceChildren();
+    const archived = state.items.filter(item => item.archived);
+    text('#archived-tasks-badge', String(archived.length));
+    text('#archived-count-chip', `${archived.length} 条归档`);
+    text('#archived-tasks-caption', `已归档 ${archived.length} 个选题`);
+
+    if (!archived.length) {
+      container.append(emptyState(
+        '暂无归档选题',
+        '在「创作空间」点击任务下方的「移入归档」，不匹配或暂不撰写的选题将从任务列表隐去并保存在这里，避免误删并释放每周工时。',
+        'book'
+      ));
+      return;
+    }
+
+    archived.forEach((item, index) => {
+      const card = el('article', 'archived-card');
+      const header = el('div', 'archived-card-header');
+      const titleGroup = el('div', 'archived-title-group');
+      titleGroup.append(
+        el('span', 'archived-index', `#${String(index + 1).padStart(2, '0')}`),
+        el('h3', 'archived-title', item.title),
+        statusPill(item.status)
+      );
+      const meta = el('div', 'archived-meta', `原预计耗时 ${item.estimatedMinutes} 分钟 · 第 ${item.revision} 版`);
+      header.append(titleGroup, meta);
+
+      const body = el('div', 'archived-card-body');
+      if (item.angle) {
+        body.append(el('p', 'archived-angle', `切入角度：${item.angle}`));
+      }
+      if (item.reason) {
+        body.append(el('p', 'archived-reason', `选题理由：${item.reason}`));
+      }
+
+      const actions = el('div', 'archived-card-actions');
+      const unarchiveBtn = el('button', 'btn btn-secondary btn-small', '↩️ 恢复到任务队列');
+      unarchiveBtn.type = 'button';
+      unarchiveBtn.title = '将该选题移回活跃任务队列，重新计入每周工时预算';
+      unarchiveBtn.addEventListener('click', async () => {
+        await writeState('/api/items/' + encodeURIComponent(item.id) + '/unarchive', 'POST', {}, { editorRefresh: true });
+        showToast(`已将「${item.title}」恢复至任务队列，重新计入本周工时预算`);
+        renderArchivedList();
+      });
+
+      const deleteBtn = el('button', 'btn btn-quiet btn-danger-text btn-small', '🗑️ 彻底删除');
+      deleteBtn.type = 'button';
+      deleteBtn.title = '永久删除此选题（不可恢复）';
+      deleteBtn.addEventListener('click', async () => {
+        if (item.status === 'published') {
+          showToast('已发布内容已计入发布历史，不能删除。');
+          return;
+        }
+        if (!window.confirm(`确定要彻底删除已归档选题「${item.title}」吗？\n删除后不可恢复。`)) return;
+        await writeState('/api/items/' + encodeURIComponent(item.id), 'DELETE', {}, { editorRefresh: true });
+        showToast(`已彻底删除选题「${item.title}」`);
+        renderArchivedList();
+      });
+
+      actions.append(unarchiveBtn, deleteBtn);
+      card.append(header, body, actions);
+      container.append(card);
+    });
   }
 
   function toggleAiPopover(force) {
@@ -1571,12 +1656,9 @@ export class AiConnectionStatus {
   $('#open-profile-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#sidebar-settings-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#open-settings-btn')?.addEventListener('click', () => openSettings('profile'));
-  $('#close-settings-btn')?.addEventListener('click', closeSettings);
-  $('#settings-modal')?.addEventListener('click', event => {
-    if (event.target === $('#settings-modal')) closeSettings();
-  });
-  $('#modal-tab-profile')?.addEventListener('click', () => switchSettingsTab('profile'));
-  $('#modal-tab-ai')?.addEventListener('click', () => switchSettingsTab('ai'));
+  $('#settings-tab-profile')?.addEventListener('click', () => switchSettingsTab('profile'));
+  $('#settings-tab-ai')?.addEventListener('click', () => switchSettingsTab('ai'));
+  $('#settings-tab-archived')?.addEventListener('click', () => switchSettingsTab('archived'));
 
   function fillModalProfile() {
     const form = $('#modal-profile-form');
@@ -1596,7 +1678,6 @@ export class AiConnectionStatus {
       if (!Number.isInteger(values.weeklyHours) || values.weeklyHours < 1 || values.weeklyHours > 40) throw new Error('每周可投入时间应为 1 到 40 的整数小时。');
       await writeState('/api/profile', 'POST', values, { profileRefresh: true });
       showToast('人设工作底稿已保存！');
-      closeSettings();
     });
   });
 
@@ -1617,8 +1698,6 @@ export class AiConnectionStatus {
     }
   });
 
-  $('#cancel-ai-key-btn')?.addEventListener('click', closeSettings);
-
   $('#ai-key-form')?.addEventListener('submit', event => {
     event.preventDefault();
     const provider = $('#ai-provider-select').value;
@@ -1632,7 +1711,6 @@ export class AiConnectionStatus {
       $('#ai-key-input').value = '';
       await loadConnectionStatus();
       showToast(`已成功验证并保存 ${provider} 凭据（DPAPI 本机加密锁定）！`);
-      window.setTimeout(closeSettings, 800);
     });
   });
 
