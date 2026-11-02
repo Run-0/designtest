@@ -183,9 +183,20 @@ export function mutate(original, method, path, body = {}) {
   else if (method === 'POST' && path === '/api/plan') plan(state, body);
   else if (method === 'POST' && path === '/api/sources') {
     if (state.sources.length >= 100) fail('最多保留 100 份参考资料。');
-    const source = { id: id(), title: text(body.title, '资料标题', 200), content: text(body.content, '资料正文', 20000), url: webUrl(body.url ?? ''), kind: 'user', createdAt: now() };
+    const allowedTypes = ['text', 'video_transcript', 'manual_post', 'image_ocr'];
+    const sourceType = own(body, 'sourceType') && allowedTypes.includes(body.sourceType) ? body.sourceType : 'text';
+    const source = {
+      id: id(),
+      title: text(body.title, '资料标题', 200),
+      content: text(body.content, '资料正文', 20000),
+      url: webUrl(body.url ?? ''),
+      sourceType,
+      kind: 'user',
+      createdAt: now()
+    };
     state.sources.push(source);
-    event(state, 'source', `已保存资料「${source.title}」。链接仅作来源记录，不会自动抓取。`);
+    const label = sourceType === 'video_transcript' ? '短视频台词' : (sourceType === 'manual_post' ? '历史笔记' : '资料');
+    event(state, 'source', `已保存${label}「${source.title}」。链接仅作来源记录，不会自动抓取。`);
   } else {
     const sourceMatch = path.match(/^\/api\/sources\/([^/]+)$/);
     const itemMatch = path.match(/^\/api\/items\/([^/]+)(?:\/(draft|review|approve|publish|metrics|archive|unarchive))?$/);

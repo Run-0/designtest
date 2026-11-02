@@ -52,10 +52,12 @@
       <a href="#publish" data-page="publish" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>待发布</span></a>
       <a href="#sources" data-page="sources" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>知识库</span></a>
       <a href="#report" data-page="report" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg><span>数据复盘</span></a>
-      <a href="#settings" data-page="settings" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span>系统设置</span></a>
     </nav>
     <div class="sidebar-bottom">
-      <div class="small-note"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><strong>小步推进，也是一种效率。</strong><p>先完成一条真实内容，<br>再让下一条更好。</p></div>
+      <button class="sidebar-settings-btn" id="open-settings-modal" type="button" aria-label="打开设置">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+        <span>设置</span>
+      </button>
     </div>
   </aside>
 
@@ -361,7 +363,30 @@
 
         <section id="page-sources" class="page" hidden aria-labelledby="sources-title">
           <div class="page-heading"><div><p class="eyebrow">让内容有依据，而不只是听起来对</p><h1 id="sources-title" tabindex="-1">知识库<span class="heading-dot">。</span></h1><p class="page-subtitle">集中管理可信资料与实测笔记，供草稿起草与引用；固定选取资料不是语义检索。</p></div><span class="page-chip" id="source-total">0 份资料</span></div>
-          <div class="sources-layout"><section aria-label="已有参考资料"><div class="section-heading"><h2>我的资料库</h2><span class="muted tiny">内置资料也需要你判断适用性</span></div><div id="source-list" class="source-list"></div></section><section class="panel source-form-panel" aria-labelledby="add-source-title"><div class="panel-heading"><h2 id="add-source-title">添加一份资料</h2><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></div><p class="muted form-intro">粘贴原文要点、产品说明或自己的实测记录。这里只保存你输入的文字，不会自动读取网址。</p><form id="source-form" data-track><label class="field">资料标题<input name="title" required maxlength="200" placeholder="例如：某款工具的官方功能说明"></label><label class="field">资料正文<textarea name="content" required rows="8" maxlength="20000" placeholder="写下可核实的信息，并注明适用条件与时间。避免粘贴个人隐私或机密。"></textarea></label><label class="field">来源网址 <span class="optional">选填</span><input name="url" type="url" placeholder="https://…" autocomplete="off"></label><p class="tiny muted">自己的经验记录可以不填网址。资料内容仍需人工核实，不等于已完成检索验证。</p><p class="form-error" id="source-error" role="alert" hidden></p><button class="btn btn-primary full-width" type="submit">保存参考资料</button></form></section></div>
+          <div class="sources-layout"><section aria-label="已有参考资料"><div class="section-heading"><h2>我的资料库</h2><span class="muted tiny">内置资料也需要你判断适用性</span></div><div id="source-list" class="source-list"></div></section><section class="panel source-form-panel" aria-labelledby="add-source-title"><div class="panel-heading"><h2 id="add-source-title">添加素材资产</h2><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></div>
+          <div class="source-type-tabs" role="tablist">
+            <button class="source-type-tab active" type="button" data-source-type="text">参考资料</button>
+            <button class="source-type-tab" type="button" data-source-type="video_transcript">短视频字幕导入</button>
+            <button class="source-type-tab" type="button" data-source-type="manual_post">历史爆款/对标</button>
+          </div>
+          <p class="muted form-intro" id="source-mode-intro">粘贴公开干货、产品说明或自己的实测记录。保存后供 AI 规划与起草调用。</p>
+          <div id="subtitle-upload-box" class="subtitle-dropzone" hidden>
+            <input type="file" id="subtitle-file-input" accept=".srt,.vtt,.txt" class="sr-only">
+            <div class="dropzone-inner" id="subtitle-drop-trigger">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+              <p><strong>点击或拖拽剪映等字幕文件到此处</strong></p>
+              <small class="muted">支持 .srt / .vtt / .txt，自动剔除分秒时间戳并拼成完整口播稿</small>
+            </div>
+          </div>
+          <form id="source-form" data-track>
+            <input type="hidden" name="sourceType" id="source-type-input" value="text">
+            <label class="field"><span id="source-title-label">资料标题</span><input name="title" required maxlength="200" placeholder="例如：某款工具的官方功能说明"></label>
+            <label class="field"><span id="source-content-label">资料正文</span><textarea name="content" required rows="8" maxlength="20000" placeholder="写下可核实的信息，并注明适用条件与时间。避免粘贴个人隐私或机密。"></textarea></label>
+            <label class="field">来源网址 <span class="optional">选填</span><input name="url" type="url" placeholder="https://…" autocomplete="off"></label>
+            <p class="tiny muted" id="source-hint">自己的经验或台词可以不填网址。资料内容仍需人工核实，不等于已完成检索验证。</p>
+            <p class="form-error" id="source-error" role="alert" hidden></p>
+            <button class="btn btn-primary full-width" type="submit" id="save-source-btn">保存参考资料</button>
+          </form></section></div>
         </section>
 
         <section id="page-report" class="page" hidden aria-labelledby="report-title">
@@ -372,41 +397,51 @@
         </section>
 
         <!-- 系统设置：全新一级页面（纵向侧边子导航与归档管理） -->
-        <section id="page-settings" class="page" hidden aria-labelledby="settings-title">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">配置创作人设、模型密件箱与归档选题</p>
-              <h1 id="settings-title" tabindex="-1">系统设置<span class="heading-dot">。</span></h1>
-              <p class="page-subtitle">管理账号人设底稿、大语言模型密件箱与已归档选题库，支持安全恢复与彻底删除。</p>
-            </div>
-            <span class="page-chip" id="settings-badge-chip">系统设置</span>
-          </div>
+      </div>
+    </main>
 
-          <div class="settings-layout">
-            <!-- 左侧纵向子导航 -->
-            <aside class="settings-sidebar" aria-label="设置导航">
-              <nav class="settings-nav">
-                <button class="settings-nav-item active" id="settings-tab-profile" type="button" data-settings-tab="profile">
-                  <div class="settings-nav-text">
-                    <strong>账号人设底稿</strong>
-                    <small>定位、受众与工时预算</small>
-                  </div>
-                </button>
-                <button class="settings-nav-item" id="settings-tab-ai" type="button" data-settings-tab="ai">
-                  <div class="settings-nav-text">
-                    <strong>AI 模型与安全密件箱</strong>
-                    <small>DPAPI 密钥加密与服务商</small>
-                  </div>
-                </button>
-                <button class="settings-nav-item" id="settings-tab-archived" type="button" data-settings-tab="archived">
-                  <div class="settings-nav-text">
-                    <strong>归档任务管理</strong>
-                    <small id="archived-tasks-caption">已归档 0 个选题</small>
-                  </div>
-                  <span class="settings-badge" id="archived-tasks-badge">0</span>
-                </button>
-              </nav>
-            </aside>
+    <!-- 系统设置：Antigravity 风格居中大弹窗 Modal -->
+    <div id="settings-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="settings-modal-box">
+        <div class="settings-modal-header">
+          <div class="settings-modal-title">
+            <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+            <h2 id="settings-modal-title">设置</h2>
+          </div>
+          <button class="modal-close" id="close-settings-modal" type="button" aria-label="关闭设置">✕</button>
+        </div>
+
+        <div class="settings-modal-body">
+          <!-- 左侧纵向子导航（对齐 Antigravity） -->
+          <aside class="settings-modal-sidebar" aria-label="设置导航">
+            <nav class="settings-nav">
+              <button class="settings-nav-item active" id="settings-tab-profile" type="button" data-settings-tab="profile">
+                <div class="settings-nav-text">
+                  <strong>账号人设底稿</strong>
+                  <small>定位、受众与工时预算</small>
+                </div>
+              </button>
+              <button class="settings-nav-item" id="settings-tab-ai" type="button" data-settings-tab="ai">
+                <div class="settings-nav-text">
+                  <strong>AI 模型与安全密件箱</strong>
+                  <small>DPAPI 密钥加密与服务商</small>
+                </div>
+              </button>
+              <button class="settings-nav-item" id="settings-tab-archived" type="button" data-settings-tab="archived">
+                <div class="settings-nav-text">
+                  <strong>归档任务管理</strong>
+                  <small id="archived-tasks-caption">已归档 0 个选题</small>
+                </div>
+                <span class="settings-badge" id="archived-tasks-badge">0</span>
+              </button>
+              <button class="settings-nav-item" id="settings-tab-account" type="button" data-settings-tab="account">
+                <div class="settings-nav-text">
+                  <strong>登录与用户账号</strong>
+                  <small>当前身份 / Web SaaS 预留</small>
+                </div>
+              </button>
+            </nav>
+          </aside>
 
             <!-- 右侧面板区 -->
             <div class="settings-content">
@@ -498,11 +533,70 @@
                   <div id="archived-list" class="archived-list"></div>
                 </section>
               </div>
+
+              <!-- Panel 4: 登录与用户账号 -->
+              <div id="settings-pane-account" class="settings-pane" hidden>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <h2>当前账号身份</h2>
+                    <span class="mini-tag">本地所有者权限</span>
+                  </div>
+
+                  <div class="account-card-box">
+                    <div class="account-avatar-wrap">
+                      <div class="account-big-avatar" id="account-avatar-preview">创</div>
+                      <div class="account-details">
+                        <strong id="account-display-name">独立创作者</strong>
+                        <span class="muted tiny" id="account-display-role">本地单机模式 · 拥有最高管理权限</span>
+                        <code class="account-badge-code">ID: local-creator-01</code>
+                      </div>
+                    </div>
+                    <div class="account-storage-meta">
+                      <div class="meta-row">
+                        <span class="meta-label">数据归属：</span>
+                        <span class="meta-val">本机私有，未连接公网多租户云端</span>
+                      </div>
+                      <div class="meta-row">
+                        <span class="meta-label">工作区文件：</span>
+                        <code class="meta-path">data/workspace.json</code>
+                      </div>
+                    </div>
+                    <div class="account-actions-row">
+                      <a href="/api/export" class="btn btn-secondary btn-small" download>
+                        <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> 下载完整数据备份 (.json)
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="panel-heading" style="margin-top: 24px;">
+                    <h2>云端 Web SaaS 登录 / 注册</h2>
+                    <span class="mini-tag">预留多租户通道</span>
+                  </div>
+                  <p class="muted form-intro">未来部署公网 Web SaaS 后，可在此登录云端创作者账号，实现跨设备多端同步与多人协作。当前单机模式下无需登录即可正常使用所有创作功能。</p>
+
+                  <form id="saas-login-form" class="saas-login-box">
+                    <div class="form-grid">
+                      <label class="field">
+                        <span>创作者账号 / 邮箱</span>
+                        <input id="saas-user-input" type="text" placeholder="creator@example.com" autocomplete="username">
+                      </label>
+                      <label class="field">
+                        <span>访问密码</span>
+                        <input id="saas-pass-input" type="password" placeholder="••••••••" autocomplete="current-password">
+                      </label>
+                    </div>
+                    <div class="saas-actions-bar">
+                      <button class="btn btn-primary" type="button" id="saas-login-btn">登录云端账号</button>
+                      <button class="btn btn-secondary" type="button" id="saas-register-btn">注册新账号</button>
+                      <span class="tiny muted" id="saas-login-tip">单机测试中：点击模拟云端校验</span>
+                    </div>
+                  </form>
+                </section>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
-    </main>
     <footer class="global-statusbar" id="global-statusbar">
       <div class="statusbar-left">
         <span class="status-indicator">

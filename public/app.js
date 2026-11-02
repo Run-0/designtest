@@ -136,7 +136,7 @@ export class AiConnectionStatus {
   if (!document.querySelector('#main-content')) return;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-  const pageNames = { overview: '工作台', planning: '选题策划', studio: '创作空间', publish: '待发布', sources: '知识库', report: '数据复盘', settings: '系统设置' };
+  const pageNames = { overview: '工作台', planning: '选题策划', studio: '创作空间', publish: '待发布', sources: '知识库', report: '数据复盘' };
   const statusNames = { idea: '待起草', draft: '草稿', reviewed: '已检查', approved: '待发布', published: '已登记发布' };
   const PROVIDER_METAS = {
     DeepSeek: {
@@ -459,10 +459,18 @@ export class AiConnectionStatus {
 
   function pageFromHash() {
     const candidate = window.location.hash.slice(1);
+    if (candidate === 'settings') {
+      setTimeout(() => openSettings('profile'), 0);
+      return 'overview';
+    }
     return Object.hasOwn(pageNames, candidate) ? candidate : 'overview';
   }
 
   function navigate(page, options = {}) {
+    if (page === 'settings') {
+      openSettings('profile');
+      return false;
+    }
     if (!Object.hasOwn(pageNames, page) || busy) return false;
     if (ui.page === 'studio' && page !== 'studio' && !confirmLeaveEditor()) return false;
     ui.page = page;
@@ -479,7 +487,6 @@ export class AiConnectionStatus {
     if (page === 'studio' && state) renderStudio();
     if (page === 'publish' && state) renderPublish();
     if (page === 'report' && state && !report && !reportLoading) loadReport();
-    if (page === 'settings' && state) renderSettings();
     return true;
   }
 
@@ -886,7 +893,19 @@ export class AiConnectionStatus {
       const card = el('article', 'source-card');
       const header = el('div', 'source-card-head');
       const title = el('div');
-      title.append(el('span', 'mini-tag', source.kind === 'builtin' ? '内置参考 · 需核实' : '手动添加'), el('h3', '', source.title));
+      let badgeClass = 'source-tag tag-text';
+      let badgeLabel = '参考资料';
+      if (source.kind === 'builtin') {
+        badgeClass = 'source-tag tag-builtin';
+        badgeLabel = '内置参考 · 需核实';
+      } else if (source.sourceType === 'video_transcript') {
+        badgeClass = 'source-tag tag-video';
+        badgeLabel = '短视频台词';
+      } else if (source.sourceType === 'manual_post') {
+        badgeClass = 'source-tag tag-post';
+        badgeLabel = '历史笔记/对标';
+      }
+      title.append(el('span', badgeClass, badgeLabel), el('h3', '', source.title));
       const usedCount = state.items.filter(item => (item.sourceIds || []).includes(source.id)).length;
       const remove = button('', 'icon-button', () => deleteSource(source));
       remove.append(icon('trash'));
@@ -1872,10 +1891,9 @@ export class AiConnectionStatus {
   });
 
   $('#retry-state').addEventListener('click', boot);
-  $('#edit-profile-shortcut').addEventListener('click', () => {
+  $('#edit-profile-shortcut')?.addEventListener('click', () => {
     if (busy) return;
-    $('#profile-details').open = true;
-    $('#profile-form [name="name"]').focus();
+    openSettings('profile');
   });
 
   $('#profile-form').addEventListener('submit', event => {
@@ -2140,6 +2158,114 @@ export class AiConnectionStatus {
     });
   });
 
+  function cleanSubtitleToTranscript(raw) {
+    if (!raw || typeof raw !== 'string') return { title: '', content: '' };
+    let text = raw.replace(/^WEBVTT[^\n]*\n+/i, '');
+    text = text.replace(/^\d+[\r\n]+(?=\d{1,2}:\d{2})/gm, '');
+    text = text.replace(/^\d{1,2}:\d{2}:\d{2}[,\.]\d{3}\s*-->\s*\d{1,2}:\d{2}:\d{2}[,\.]\d{3}[^\r\n]*$/gm, '');
+    text = text.replace(/^\d{1,2}:\d{2}[,\.]\d{3}\s*-->\s*\d{1,2}:\d{2}[,\.]\d{3}[^\r\n]*$/gm, '');
+    text = text.replace(/^\s*\d+\s*$/gm, '');
+    text = text.replace(/<\/?\d{2}:\d{2}[^>]*>/g, '');
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const cleaned = lines.join(' ');
+    const firstSentence = (cleaned.split(/[。！？!?]/)[0] || '').trim();
+    const recommendedTitle = firstSentence.length >= 3 ? (firstSentence.length > 35 ? firstSentence.slice(0, 34) + '…' : firstSentence) : '短视频口播文案';
+    return { title: recommendedTitle, content: cleaned };
+  }
+
+  // 素材资产库选项卡与字幕解析交互
+  const sourceTypeTabs = $$('.source-type-tab');
+  sourceTypeTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      sourceTypeTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const type = tab.dataset.sourceType;
+      $('#source-type-input').value = type;
+      const dropzone = $('#subtitle-upload-box');
+      const titleLabel = $('#source-title-label');
+      const contentLabel = $('#source-content-label');
+      const titleInput = $('#source-form [name="title"]');
+      const contentInput = $('#source-form [name="content"]');
+      const modeIntro = $('#source-mode-intro');
+      const hint = $('#source-hint');
+
+      if (type === 'video_transcript') {
+        dropzone.hidden = false;
+        titleLabel.textContent = '视频 / 台词标题';
+        contentLabel.textContent = '口播正文台词';
+        titleInput.placeholder = '例如：高效工作的3个底层逻辑';
+        contentInput.placeholder = '支持直接在上方拖入剪映导出的 .srt / .vtt 字幕文件，系统将自动去除分秒时间戳并转换为通顺的口播台词。';
+        modeIntro.textContent = '支持剪映等字幕文件直接导入，自动剔除分秒时间码并拼成完整口播稿，供后续延展创作与复用。';
+        hint.textContent = '短视频台词来源于你已剪辑或录制的内容，无需填写网址。';
+      } else if (type === 'manual_post') {
+        dropzone.hidden = true;
+        titleLabel.textContent = '笔记 / 选题标题';
+        contentLabel.textContent = '高赞正文或爆款拆解';
+        titleInput.placeholder = '例如：重阳来历不必玄，一盅秋茶里的岁时心意';
+        contentInput.placeholder = '粘贴你在小红书、朋友圈发过的高赞文案，或收藏的同行爆款结构。';
+        modeIntro.textContent = '记录自己或同赛道的高赞文案，AI 在起草和规划时将参考这套语气风格与行文节奏。';
+        hint.textContent = '如果是同行爆款，可将笔记原链接附在下方，便于追溯。';
+      } else {
+        dropzone.hidden = true;
+        titleLabel.textContent = '资料标题';
+        contentLabel.textContent = '资料正文';
+        titleInput.placeholder = '例如：某款工具的官方功能说明';
+        contentInput.placeholder = '写下可核实的信息，并注明适用条件与时间。避免粘贴个人隐私或机密。';
+        modeIntro.textContent = '粘贴公开干货、产品说明或自己的实测记录。保存后供 AI 规划与起草调用。';
+        hint.textContent = '自己的经验或台词可以不填网址。资料内容仍需人工核实，不等于已完成检索验证。';
+      }
+    });
+  });
+
+  const dropTrigger = $('#subtitle-drop-trigger');
+  const fileInput = $('#subtitle-file-input');
+  if (dropTrigger && fileInput) {
+    dropTrigger.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const raw = await file.text();
+        const { title, content } = cleanSubtitleToTranscript(raw);
+        if (!content) {
+          showToast('未能从文件中提取出有效字幕文本，请检查文件格式。', 'error');
+          return;
+        }
+        $('#source-form [name="title"]').value = title;
+        $('#source-form [name="content"]').value = content;
+        showToast(`已成功解析字幕：提取出 ${content.length} 字完整口播台词！`);
+      } catch (err) {
+        showToast('读取字幕文件失败：' + err.message, 'error');
+      }
+    });
+
+    const dropzoneBox = $('#subtitle-upload-box');
+    dropzoneBox.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzoneBox.classList.add('drag-over');
+    });
+    dropzoneBox.addEventListener('dragleave', () => dropzoneBox.classList.remove('drag-over'));
+    dropzoneBox.addEventListener('drop', async e => {
+      e.preventDefault();
+      dropzoneBox.classList.remove('drag-over');
+      const file = e.dataTransfer.files?.[0];
+      if (!file) return;
+      try {
+        const raw = await file.text();
+        const { title, content } = cleanSubtitleToTranscript(raw);
+        if (!content) {
+          showToast('未能从文件中提取出有效字幕文本，请检查文件格式。', 'error');
+          return;
+        }
+        $('#source-form [name="title"]').value = title;
+        $('#source-form [name="content"]').value = content;
+        showToast(`已成功解析字幕：提取出 ${content.length} 字完整口播台词！`);
+      } catch (err) {
+        showToast('读取字幕文件失败：' + err.message, 'error');
+      }
+    });
+  }
+
   $('#source-form').addEventListener('submit', event => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -2148,16 +2274,19 @@ export class AiConnectionStatus {
       const title = values.title.trim();
       const content = values.content.trim();
       if (!title || !content) throw new Error('请填写资料标题和正文，不能只有空格。');
-      const payload = { title, content };
-      if (values.url.trim()) {
+      const sourceType = values.sourceType || 'text';
+      const payload = { title, content, sourceType };
+      if (values.url && values.url.trim()) {
         const url = safeUrl(values.url.trim());
         if (!url) throw new Error('来源网址请以 https:// 开头，也可以留空。');
         payload.url = url;
       }
       await writeState('/api/sources', 'POST', payload);
       form.reset();
+      $('#source-type-input').value = sourceType;
       stampForm(form);
-      showToast('参考资料已保存。生成新草稿时会使用当时已有的资料。');
+      const tip = sourceType === 'video_transcript' ? '短视频台词已保存入库。' : (sourceType === 'manual_post' ? '历史高赞文案已保存入库。' : '参考资料已保存。');
+      showToast(tip + ' 生成新草稿时会使用当时已有的资料。');
     });
   });
 
@@ -2398,13 +2527,20 @@ export class AiConnectionStatus {
   });
 
   function openSettings(tab = 'profile') {
-    navigate('settings');
+    const modal = $('#settings-modal');
+    if (!modal) return;
+    modal.hidden = false;
     switchSettingsTab(tab);
     renderSettings();
   }
 
+  function closeSettings() {
+    const modal = $('#settings-modal');
+    if (modal) modal.hidden = true;
+  }
+
   function switchSettingsTab(tab) {
-    const validTabs = ['profile', 'ai', 'archived'];
+    const validTabs = ['profile', 'ai', 'archived', 'account'];
     const activeTab = validTabs.includes(tab) ? tab : 'profile';
     validTabs.forEach(t => {
       const btn = $(`#settings-tab-${t}`);
@@ -2415,12 +2551,24 @@ export class AiConnectionStatus {
     if (activeTab === 'archived') {
       renderArchivedList();
     }
+    if (activeTab === 'account') {
+      renderAccountSettings();
+    }
   }
 
   function renderSettings() {
     fillModalProfile();
     fillAiSettings();
     renderArchivedList();
+    renderAccountSettings();
+  }
+
+  function renderAccountSettings() {
+    const name = state?.profile?.name || '独立创作者';
+    const avatarEl = $('#account-avatar-preview');
+    const nameEl = $('#account-display-name');
+    if (avatarEl) avatarEl.textContent = name.trim().charAt(0) || '创';
+    if (nameEl) nameEl.textContent = name;
   }
 
   function fillAiSettings() {
@@ -2536,12 +2684,38 @@ export class AiConnectionStatus {
     }
   });
 
+  $('#open-settings-modal')?.addEventListener('click', () => openSettings('profile'));
+  $('#close-settings-modal')?.addEventListener('click', closeSettings);
+  $('#settings-modal')?.addEventListener('click', event => {
+    if (event.target === $('#settings-modal')) closeSettings();
+  });
+  window.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !$('#settings-modal')?.hidden) {
+      closeSettings();
+    }
+  });
+
   $('#open-profile-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#sidebar-settings-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#open-settings-btn')?.addEventListener('click', () => openSettings('profile'));
   $('#settings-tab-profile')?.addEventListener('click', () => switchSettingsTab('profile'));
   $('#settings-tab-ai')?.addEventListener('click', () => switchSettingsTab('ai'));
   $('#settings-tab-archived')?.addEventListener('click', () => switchSettingsTab('archived'));
+  $('#settings-tab-account')?.addEventListener('click', () => switchSettingsTab('account'));
+
+  $('#saas-login-btn')?.addEventListener('click', () => {
+    const userInput = $('#saas-user-input')?.value?.trim();
+    if (!userInput) {
+      showToast('请输入创作者账号或邮箱');
+      $('#saas-user-input')?.focus();
+      return;
+    }
+    showToast('当前处于本地单机工作区模式，数据全部保存在本机。公网多租户云端版本就绪后将直接支持无缝登录！');
+  });
+
+  $('#saas-register-btn')?.addEventListener('click', () => {
+    showToast('当前单机模式拥有最高创作者权限，数据保存在本机。公网 SaaS 开放注册时可一键迁移。');
+  });
 
   function fillModalProfile() {
     const form = $('#modal-profile-form');

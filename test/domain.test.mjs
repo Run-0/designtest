@@ -256,6 +256,32 @@ test('参考资料：校验并规范化，不自动抓取链接', () => {
   assert.equal(boundary.sources.at(-1).content.length, 20000);
 });
 
+test('参考资料：支持指定素材类型（video_transcript / manual_post / text），默认 text', () => {
+  const state = createInitialState();
+  const transcript = apply(state, 'POST', '/api/sources', {
+    title: '短视频口播文案',
+    content: '这是从短视频字幕中提取的口播台词',
+    sourceType: 'video_transcript',
+  });
+  assert.equal(transcript.sources.at(-1).sourceType, 'video_transcript');
+  assert.match(transcript.events[0].message, /短视频台词/);
+
+  const post = apply(state, 'POST', '/api/sources', {
+    title: '历史爆款笔记',
+    content: '这是在小红书获得千赞的笔记正文',
+    sourceType: 'manual_post',
+  });
+  assert.equal(post.sources.at(-1).sourceType, 'manual_post');
+  assert.match(post.events[0].message, /历史笔记/);
+
+  const fallback = apply(state, 'POST', '/api/sources', {
+    title: '非法类型回退',
+    content: '回退为默认 text',
+    sourceType: 'invalid_type',
+  });
+  assert.equal(fallback.sources.at(-1).sourceType, 'text');
+});
+
 test('参考资料：拒绝缺失、错误类型、空字符、过长和危险 URL', () => {
   const state = createInitialState();
   const valid = { title: '标题', content: '资料正文', url: 'https://example.com/' };

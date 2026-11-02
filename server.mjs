@@ -40,7 +40,9 @@ function validStoredState(state) {
   if (!Object.entries(limits).every(([key, max]) => string(state.profile[key], max)) || !number(state.profile.weeklyHours, 1, 40)) return false;
   if (!Array.isArray(state.sources) || state.sources.length > 100 || !Array.isArray(state.items) || state.items.length > 500 || !Array.isArray(state.events) || state.events.length > 300) return false;
   if (!state.sources.every(source => object(source) && string(source.id, 100) && string(source.title, 200) && string(source.content, 20000) &&
-      ['builtin', 'user'].includes(source.kind) && (source.url === '' || url(source.url)) && date(source.createdAt))) return false;
+      ['builtin', 'user'].includes(source.kind) &&
+      (source.sourceType === undefined || ['text', 'video_transcript', 'manual_post', 'image_ocr'].includes(source.sourceType)) &&
+      (source.url === '' || url(source.url)) && date(source.createdAt))) return false;
   const sources = new Set(state.sources.map(source => source.id));
   if (sources.size !== state.sources.length) return false;
   if (!state.items.every(item => {

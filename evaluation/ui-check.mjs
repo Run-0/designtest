@@ -121,6 +121,18 @@ const PAGE_SCRIPT = String.raw`async () => {
     await waitFor(() => document.querySelectorAll('.source-card').length === 2, '资料未出现');
   });
 
+  await step('导入短视频口播字幕并验证分类标签', async () => {
+    document.querySelector('.source-type-tab[data-source-type="video_transcript"]').click();
+    if ($('#subtitle-upload-box').hidden) throw new Error('字幕上传区未展示');
+    set('#source-form [name="title"]', '短视频口播：如何高效专注两小时');
+    set('#source-form [name="content"]', '很多人以为专注靠毅力，其实只要做好两件事：第一清空桌面，第二把手机关静音放进抽屉。');
+    $('#source-form').requestSubmit();
+    await waitIdle();
+    await waitFor(() => document.querySelectorAll('.source-card').length === 3, '短视频资料未出现');
+    const badge = document.querySelector('.source-tag.tag-video');
+    if (!badge || !badge.textContent.includes('短视频台词')) throw new Error('短视频台词标签未正确渲染');
+  });
+
   await step('创建计划并生成模板草稿', async () => {
     await go('planning');
     set('#plan-count', '1');
@@ -178,6 +190,16 @@ const PAGE_SCRIPT = String.raw`async () => {
     await waitFor(() => $('#report-rows').textContent.includes('20%'), '互动率未显示 20%');
   });
 
+  await step('侧边栏底部设置与账号弹窗检查', async () => {
+    $('#open-settings-modal').click();
+    await waitFor(() => !$('#settings-modal').hidden, '设置弹窗未打开');
+    $('#settings-tab-account').click();
+    await waitFor(() => !$('#settings-pane-account').hidden, '登录与账号面板未打开');
+    if (!$('#account-display-role').textContent.includes('本地单机模式')) throw new Error('创作者身份卡片未渲染');
+    $('#close-settings-modal').click();
+    await waitFor(() => $('#settings-modal').hidden, '设置弹窗未关闭');
+  });
+
   return { results, title: document.title };
 }`;
 
@@ -192,11 +214,18 @@ const NARROW_SCRIPT = String.raw`async () => {
     observer.observe(document.body, { subtree: true, attributes: true });
   });
   const overflow = [];
-  for (const page of ['overview', 'planning', 'studio', 'publish', 'sources', 'report', 'settings']) {
+  for (const page of ['overview', 'planning', 'studio', 'publish', 'sources', 'report']) {
     $('[data-page="' + page + '"]').click();
     await waitFor(() => !$('#page-' + page).hidden);
     if (document.documentElement.scrollWidth > window.innerWidth + 1) overflow.push(page);
   }
+  $('#open-settings-modal').click();
+  await waitFor(() => !$('#settings-modal').hidden);
+  $('#settings-tab-account').click();
+  await waitFor(() => !$('#settings-pane-account').hidden);
+  if (document.documentElement.scrollWidth > window.innerWidth + 1) overflow.push('settings-modal');
+  $('#close-settings-modal').click();
+  await waitFor(() => $('#settings-modal').hidden);
   return { width: window.innerWidth, overflow };
 }`;
 
