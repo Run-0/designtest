@@ -136,7 +136,7 @@ export class AiConnectionStatus {
   if (!document.querySelector('#main-content')) return;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-  const pageNames = { overview: '工作台', studio: '创作空间', sources: '知识库', report: '数据复盘', settings: '系统设置' };
+  const pageNames = { overview: '工作台', planning: '选题策划', studio: '创作空间', publish: '待发布', sources: '知识库', report: '数据复盘', settings: '系统设置' };
   const statusNames = { idea: '待起草', draft: '草稿', reviewed: '已检查', approved: '待发布', published: '已登记发布' };
   const PROVIDER_METAS = {
     DeepSeek: {
@@ -264,8 +264,9 @@ export class AiConnectionStatus {
     return container;
   }
 
-  function statCard(label, value, foot, iconName) {
-    const card = el('div', 'stat-card');
+  function statCard(label, value, foot, iconName, onClick) {
+    const card = onClick ? button('', 'stat-card stat-card-clickable', onClick) : el('div', 'stat-card');
+    if (onClick) card.setAttribute('title', `点击前往：${label}`);
     const labelRow = el('div', 'stat-label');
     const image = el('span', 'stat-icon');
     image.append(icon(iconName));
@@ -283,7 +284,7 @@ export class AiConnectionStatus {
   }
 
   function setError(selector, message) {
-    const target = $(selector);
+    const target = typeof selector === 'string' ? $(selector) : selector;
     if (!target) return;
     target.textContent = message || '';
     target.hidden = !message;
@@ -344,7 +345,7 @@ export class AiConnectionStatus {
     const provider = aiConnection.data?.provider || 'DeepSeek';
     const model = aiConnection.data?.model || 'deepseek-flash';
     if (status.canGenerateDraft) {
-      text('#mode-badge', `⚡ ${provider} · 就绪`);
+      text('#mode-badge', `${provider} · 就绪`);
       badge?.setAttribute('title', `已连接 ${provider} (${model})，本地预算正常`);
     } else {
       text('#mode-badge', status.label);
@@ -444,7 +445,8 @@ export class AiConnectionStatus {
   }
 
   function publishDirty() {
-    return !$('#publish-form').hidden && formDirty($('#publish-form'));
+    const form = $('#publish-form');
+    return Boolean(form && !form.hidden && formDirty(form));
   }
 
   function confirmLeaveEditor() {
@@ -469,10 +471,13 @@ export class AiConnectionStatus {
     }
     renderNavigation();
     if (options.focus !== false && state) {
-      const heading = $('#' + page + '-title');
-      heading.focus({ preventScroll: true });
+      const heading = $('#' + page + '-title') || $('#' + page + '-heading') || $('#' + page + '-page-title');
+      heading?.focus({ preventScroll: true });
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
+    if (page === 'planning' && state) renderPlanning();
+    if (page === 'studio' && state) renderStudio();
+    if (page === 'publish' && state) renderPublish();
     if (page === 'report' && state && !report && !reportLoading) loadReport();
     if (page === 'settings' && state) renderSettings();
     return true;
@@ -519,16 +524,26 @@ export class AiConnectionStatus {
     text('#plan-budget', '每条预计 40 分钟；每周预算 ' + number(budgetMinutes) + ' 分钟，未发布内容预计 ' + number(pendingMinutes) + ' 分钟。');
     text('#profile-summary', [profile.platform, profile.audience].filter(Boolean).join(' · '));
     $('#overview-stats').replaceChildren(
-      statCard('全部内容', number(state.items.length), '包含计划到发布的全部状态', 'file'),
-      statCard('草稿内容', number(draftCount), '草稿与已检查、未人工确认', 'pen'),
-      statCard('待发布', number(state.items.filter(item => item.status === 'approved').length), '已人工确认，等待自行发布', 'shield'),
-      statCard('已登记发布', number(state.items.filter(item => item.status === 'published').length), '仅代表已登记发布网址', 'link')
+      statCard('全部内容', number(state.items.length), '包含计划到发布的全部状态 · 点击查看', 'file', () => {
+        ui.filter = 'all';
+        navigate('planning');
+      }),
+      statCard('草稿内容', number(draftCount), '草稿与已检查、未人工确认 · 点击查看', 'pen', () => {
+        ui.filter = 'draft';
+        navigate('planning');
+      }),
+      statCard('待发布', number(state.items.filter(item => item.status === 'approved').length), '已人工确认，等待自行发布 · 点击前往', 'shield', () => {
+        navigate('publish');
+      }),
+      statCard('已登记发布', number(state.items.filter(item => item.status === 'published').length), '仅代表已登记发布网址 · 点击复盘', 'link', () => {
+        navigate('report');
+      })
     );
     const recent = $('#recent-items');
     recent.replaceChildren();
     const items = newest(state.items, 'updatedAt').slice(0, 4);
     if (!items.length) {
-      recent.append(emptyState('你的第一条内容，还在等你', '先创建一条计划，再逐步把想法写完整。', 'pen', '去创建计划', () => navigate('studio'), true));
+      recent.append(emptyState('你的第一条内容，还在等你', '先创建一条计划，再逐步把想法写完整。', 'pen', '去创建计划', () => navigate('planning'), true));
     } else {
       items.forEach(item => {
         const row = button('', 'recent-row', () => openItem(item.id));
@@ -567,6 +582,36 @@ export class AiConnectionStatus {
     });
     stampForm(form);
     ui.profileRefresh = false;
+  }
+
+  function renderPlanning() {
+    renderFilters();
+    renderContentList();
+    if (state?.profile) {
+      const budgetMinutes = Math.max(0, Number(state.profile.weeklyHours) * 60 || 0);
+      const pendingMinutes = state.items.filter(item => item.status !== 'published' && !item.archived).reduce((sum, item) => sum + (Number(item.estimatedMinutes) || 0), 0);
+      const remainingMinutes = Math.max(0, budgetMinutes - pendingMinutes);
+      text('#plan-budget', '每条预计 40 分钟；每周预算 ' + number(budgetMinutes) + ' 分钟，未发布内容预计 ' + number(pendingMinutes) + ' 分钟。');
+      text('#planning-budget-text', '剩余 ' + number(remainingMinutes) + ' 分钟 / 共 ' + number(budgetMinutes) + ' 分钟');
+    }
+  }
+
+  function renderStudio() {
+    if (ui.selectedId && state.items.some(item => item.id === ui.selectedId && !item.archived)) {
+      renderEditor();
+    } else {
+      const unarchived = newest(state.items).filter(item => !item.archived);
+      if (unarchived.length) {
+        ui.selectedId = unarchived[0].id;
+        renderEditor();
+      } else {
+        ui.selectedId = null;
+        ui.renderedId = null;
+        $('#editor-empty').hidden = false;
+        $('#editor-content').hidden = true;
+        text('#studio-active-title', '专注正文写作 · 规则检查 · 人工确认');
+      }
+    }
   }
 
   function renderFilters() {
@@ -626,8 +671,15 @@ export class AiConnectionStatus {
     const item = currentItem();
     $('#editor-empty').hidden = Boolean(item);
     $('#editor-content').hidden = !item;
-    if (!item) { ui.renderedId = null; return; }
-    const preserveUrl = ui.renderedId === item.id && !ui.discardPublish ? $('#published-url').value : '';
+    if (!item) {
+      ui.renderedId = null;
+      text('#studio-active-title', '专注正文写作 · 规则检查 · 人工确认');
+      return;
+    }
+    text('#studio-active-title', item.title || '无标题草稿');
+    const approvedBanner = $('#studio-approved-banner');
+    if (approvedBanner) approvedBanner.hidden = item.status !== 'approved';
+    const preserveUrl = $('#published-url') && ui.renderedId === item.id && !ui.discardPublish ? $('#published-url').value : '';
     ui.discardPublish = false;
     ui.renderedId = item.id;
     ui.editorRefresh = false;
@@ -641,11 +693,12 @@ export class AiConnectionStatus {
     text('#editor-angle', item.angle ? '创作角度：' + item.angle : '结合实际体验与参考资料，完成这份内容。');
     $('#human-confirm').checked = false;
     $('#approve-form').hidden = ['approved', 'published'].includes(item.status);
-    $('#publish-form').hidden = item.status === 'published';
+    if ($('#publish-form')) {
+      $('#publish-form').hidden = item.status === 'published';
+      stampForm($('#publish-form'));
+      $('#published-url').value = item.status === 'published' ? (item.publishedUrl || '') : preserveUrl;
+    }
     $('#published-info').hidden = item.status !== 'published';
-    $('#published-url').value = item.status === 'published' ? (item.publishedUrl || '') : '';
-    stampForm($('#publish-form'));
-    if (item.status !== 'published') $('#published-url').value = preserveUrl;
     text('#editor-help', item.status === 'published' ? '已登记发布的内容不可再修改。可导出文本，或到数据复盘录入实际反馈。' : '修改标题或正文后，已有检查与人工确认会失效，需要重新检查。');
     const references = $('#editor-sources');
     references.replaceChildren();
@@ -694,11 +747,11 @@ export class AiConnectionStatus {
     }
     const citations = Array.isArray(ai.citations) ? ai.citations : [];
     if (citations.length) {
-      target.append(el('h3', '', '📌 知识切片溯源引用依据（轻量 RAG）'));
+      target.append(el('h3', '', '知识切片溯源引用依据（轻量 RAG）'));
       const citationList = el('div', 'citation-list');
       citations.forEach(c => {
         const itemEl = el('div', 'citation-card');
-        const badge = el('span', 'citation-badge', `[${c.ref}]`);
+        const badge = el('span', 'citation-badge', `依据 ${c.ref}`);
         const titleEl = el('strong', 'citation-title', c.sourceTitle || '参考资料');
         const quoteEl = el('p', 'citation-quote', `原句摘录：“${c.quote}”`);
         itemEl.append(badge, titleEl, quoteEl);
@@ -709,7 +762,7 @@ export class AiConnectionStatus {
     const retrievedChunks = Array.isArray(ai.retrievedChunks) ? ai.retrievedChunks : [];
     if (retrievedChunks.length) {
       const details = el('details', 'rag-chunks-details');
-      const summary = el('summary', '', `🔍 命中的知识切片微段落（共 ${retrievedChunks.length} 个）`);
+      const summary = el('summary', '', `命中的知识切片微段落（共 ${retrievedChunks.length} 个）`);
       const chunksList = el('div', 'chunks-list');
       retrievedChunks.forEach(chunk => {
         const cEl = el('div', 'rag-chunk-item');
@@ -779,7 +832,7 @@ export class AiConnectionStatus {
         countEl.textContent = `${bodyLen} 字符 · 建议充实步骤`;
         countEl.className = 'word-count-pill count-short';
       } else if (bodyLen <= 650) {
-        countEl.textContent = `${bodyLen} 字符 · 达标 🟢`;
+        countEl.textContent = `${bodyLen} 字符 · 达标`;
         countEl.className = 'word-count-pill count-optimal';
       } else {
         countEl.textContent = `${bodyLen} 字符 · 偏长`;
@@ -800,14 +853,14 @@ export class AiConnectionStatus {
     text('#export-draft span', dirty ? '保存后导出 TXT' : '导出 TXT');
     if ($('#archive-draft-btn')) {
       $('#archive-draft-btn').hidden = published;
-      text('#archive-draft-btn span', '📦 移入归档（不占本周）');
+      text('#archive-draft-btn span', '移入归档（不占本周）');
     }
     $('#review-draft').disabled = published || !validText;
     text('#review-draft', dirty ? '保存并规则检查' : '运行规则检查');
     $('#human-confirm').disabled = !reviewed || blocked || published;
     $('#approve-draft').disabled = !reviewed || blocked || !$('#human-confirm').checked || published;
-    $('#published-url').disabled = item.status !== 'approved' || dirty;
-    $('#publish-item').disabled = item.status !== 'approved' || dirty;
+    if ($('#published-url')) $('#published-url').disabled = item.status !== 'approved' || dirty;
+    if ($('#publish-item')) $('#publish-item').disabled = item.status !== 'approved' || dirty;
     let hint = '先运行当前版本的规则检查，再勾选人工核实确认。';
     if (dirty) hint = '有未保存修改：请先保存并重新检查，再人工确认。';
     else if (reviewed && blocked) hint = '仍有「需修正」项，修改内容并重新检查后才能确认。';
@@ -866,6 +919,719 @@ export class AiConnectionStatus {
       await writeState('/api/sources/' + encodeURIComponent(source.id), 'DELETE');
       showToast('资料已删除。');
     });
+  }
+
+  async function publishItemById(itemId, urlString, triggerButton, errorContainer) {
+    const item = state.items.find(i => i.id === itemId);
+    if (!item) return;
+    await runAction(triggerButton, errorContainer, async () => {
+      if (item.status !== 'approved') throw new Error('仅已人工确认的内容可登记发布。');
+      const url = safeUrl(urlString);
+      if (!url) throw new Error('请填写合法的 https:// 网址，不要填写账号密码。');
+      await writeState('/api/items/' + encodeURIComponent(item.id) + '/publish', 'POST', { url }, { editorRefresh: true, metricsRefresh: true });
+      report = null;
+      reportSequence += 1;
+      reportLoading = false;
+      $('#report-loading').hidden = true;
+      showToast('已登记发布网址，已进入数据复盘！');
+    });
+  }
+
+  const CARD_THEMES = {
+    'theme-warm': {
+      name: '温润东方',
+      bg: '#f8f5ed',
+      color: '#273022',
+      borderColor: '#e4dbca',
+      badgeBg: '#ebdccb',
+      badgeColor: '#7d4a2a',
+      angleBg: '#f4f0e6',
+      angleColor: '#5d6754',
+      angleBorder: '#e2d7c5',
+      pillBg: '#b84b29',
+      pillColor: '#ffffff',
+      quoteBg: '#fdfcf7',
+      quoteBorder: '#d8cebe',
+      watermarkColor: '#85907e',
+      accent: '#b84b29',
+    },
+    'theme-sage': {
+      name: '极简青竹',
+      bg: '#f0f5eb',
+      color: '#1c291c',
+      borderColor: '#cadac2',
+      badgeBg: '#d7e6d1',
+      badgeColor: '#2b582f',
+      angleBg: '#e7efe1',
+      angleColor: '#495e46',
+      angleBorder: '#c6d8be',
+      pillBg: '#336938',
+      pillColor: '#ffffff',
+      quoteBg: '#f7fbf5',
+      quoteBorder: '#c6d8be',
+      watermarkColor: '#6b8268',
+      accent: '#336938',
+    },
+    'theme-terracotta': {
+      name: '赭石秋序',
+      bg: '#fdf5f0',
+      color: '#36231d',
+      borderColor: '#e8c9bd',
+      badgeBg: '#eed3c7',
+      badgeColor: '#873922',
+      angleBg: '#f6e4dc',
+      angleColor: '#704b40',
+      angleBorder: '#e8cbbf',
+      pillBg: '#ba4f30',
+      pillColor: '#ffffff',
+      quoteBg: '#fff9f7',
+      quoteBorder: '#e8cbbf',
+      watermarkColor: '#9e6b5d',
+      accent: '#ba4f30',
+    },
+    'theme-dark': {
+      name: '深夜墨静',
+      bg: '#1c201c',
+      color: '#ede8dc',
+      borderColor: '#3d463d',
+      badgeBg: '#3d3429',
+      badgeColor: '#dfa680',
+      angleBg: '#2a312a',
+      angleColor: '#b0baa9',
+      angleBorder: '#444f44',
+      pillBg: '#d88b5d',
+      pillColor: '#1c201c',
+      quoteBg: '#242c23',
+      quoteBorder: '#3f4a3e',
+      watermarkColor: '#7a8877',
+      accent: '#d88b5d',
+    },
+  };
+
+  let currentCardItem = null;
+  let currentCardTheme = 'theme-warm';
+  let currentCardMode = 'question';
+
+  function generateQuestionHook(item) {
+    if (!item) return { title: '', sub: '', point: '', points: [] };
+    const rawTitle = (item.title || '').trim();
+    const rawAngle = (item.angle || '').trim();
+    const rawBody = (item.body || '').replace(/\[\d+\]/g, '').trim();
+
+    let questionTitle = '';
+    const angleQuoteMatch = rawAngle.match(/[“「]([^”」]+[？?为何怎么如何为什么][^”」]*)[”」]/);
+    if (angleQuoteMatch && angleQuoteMatch[1]) {
+      questionTitle = angleQuoteMatch[1].trim();
+      if (!questionTitle.endsWith('？') && !questionTitle.endsWith('?')) questionTitle += '？';
+    } else if (/[？?]/.test(rawTitle)) {
+      questionTitle = rawTitle;
+    } else if (rawTitle.includes('不必')) {
+      const parts = rawTitle.split(/[，,]/);
+      if (parts.length >= 2) {
+        questionTitle = `${parts[0].replace(/不必.*$/, '')}，为何${parts[1].replace(/里的.*$/, '')}才是真意？`;
+      } else {
+        questionTitle = `${rawTitle}，究竟有何深意？`;
+      }
+    } else if (rawTitle.includes('为何') || rawTitle.includes('为什么') || rawTitle.includes('如何') || rawTitle.includes('怎么')) {
+      questionTitle = rawTitle.endsWith('？') ? rawTitle : rawTitle + '？';
+    } else {
+      questionTitle = `${rawTitle}，到底有何不同？`;
+    }
+
+    let sub = '';
+    const reflectionMatch = rawBody.match(/(?:其实|原来|比起)[^，。；\n]+[，。；]/);
+    if (reflectionMatch) {
+      sub = reflectionMatch[0].replace(/[，。；]$/, '').trim();
+    } else if (rawAngle) {
+      const angleParts = rawAngle.split(/[，；。]/).filter(s => s.length >= 8 && !s.includes('切入') && !s.includes('先补'));
+      sub = angleParts[0] || '顺应物候与时令生活的小小体悟';
+    } else {
+      sub = '顺应时令生活的小小体悟';
+    }
+
+    // 提取单句核心疑问句（只保留 1 句最吸睛的核心反问）
+    let singlePoint = '';
+    if (rawBody.includes('茶') || rawTitle.includes('茶')) {
+      singlePoint = '时令温茶，为何一盅微暖胜过过量滋补？';
+    } else if (rawBody.includes('登高') || rawBody.includes('慢走')) {
+      singlePoint = '登高慢走，怎样呼吸才得松弛不累？';
+    } else if (rawBody.includes('案几') || rawBody.includes('收拾') || rawBody.includes('留白')) {
+      singlePoint = '居室收拾留白，怎样真正呼应万物收藏？';
+    } else {
+      const bodyQuestions = rawBody.match(/[^。！？\n]+[？?]/g);
+      if (bodyQuestions && bodyQuestions.length > 0) {
+        singlePoint = bodyQuestions[0].trim();
+      } else {
+        singlePoint = '顺应时令物候，如何用一件生活小事安顿身心？';
+      }
+    }
+
+    return {
+      title: questionTitle,
+      sub,
+      point: singlePoint,
+      points: [singlePoint],
+    };
+  }
+
+  function generateHashtags(item) {
+    if (!item) return ['#时令生活', '#东方美学', '#治愈系生活', '#松弛感日常'];
+    const text = `${item.title || ''} ${item.angle || ''} ${item.body || ''}`;
+    const tags = new Set();
+
+    // 1. 时令与节气热点
+    if (text.includes('重阳')) {
+      tags.add('#重阳节');
+      tags.add('#重阳习俗');
+    }
+    if (text.includes('霜降')) tags.add('#霜降');
+    if (text.includes('立冬')) tags.add('#立冬');
+    if (text.includes('秋')) {
+      tags.add('#秋日生活打卡');
+      tags.add('#秋天');
+    }
+
+    // 2. 核心生活方式与内容垂类
+    if (text.includes('茶')) {
+      tags.add('#秋天喝什么茶');
+      tags.add('#茶生活');
+      tags.add('#围炉煮茶');
+    }
+    if (text.includes('登高') || text.includes('行')) tags.add('#户外慢走');
+    if (text.includes('物候') || text.includes('时令') || text.includes('节气')) {
+      tags.add('#时令生活');
+      tags.add('#我的节气生活');
+    }
+
+    // 3. 高流量美学与情绪底座
+    tags.add('#东方美学');
+    tags.add('#松弛感日常');
+    tags.add('#治愈系生活');
+    tags.add('#生活美学');
+    tags.add('#日签');
+
+    return Array.from(tags).slice(0, 8);
+  }
+
+  function extractCardPoints(body) {
+    if (!body) return [];
+    const cleaned = body.replace(/\[\d+\]/g, '').trim();
+    const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const points = [];
+    const numberedPattern = /^(?:[0-9]+[、.．]|(?:其[一二三四五]|第[一二三四五])[、，：:]|[•·\-\*])\s*(.+)$/;
+    for (const line of lines) {
+      const match = line.match(numberedPattern);
+      if (match && match[1]) points.push(match[1].trim());
+    }
+    if (points.length < 2) {
+      const inlinePattern = /(?:其[一二三四五]|第[一二三四五])[，、：:]([^，。；\n]+[。；]?)/g;
+      let m;
+      while ((m = inlinePattern.exec(cleaned)) !== null) {
+        if (m[1].trim()) points.push(m[1].trim());
+      }
+    }
+    if (points.length < 2) {
+      const sentences = cleaned.split(/[。\n]+/).map(s => s.trim()).filter(s => s.length >= 10 && !s.startsWith('需注意') && !s.startsWith('注：'));
+      for (const s of sentences) {
+        if (points.length >= 4) break;
+        points.push(s);
+      }
+    }
+    return points.slice(0, 4).map(p => p.length > 55 ? p.slice(0, 52) + '…' : p);
+  }
+
+  function extractCardQuote(body, angle) {
+    if (!body) return angle || '不负时令，慢品日常。';
+    const cleaned = body.replace(/\[\d+\]/g, '').trim();
+    const quoteMatch = cleaned.match(/[“「]([^”」]{10,60})[”」]/);
+    if (quoteMatch && quoteMatch[1]) return quoteMatch[1].trim();
+    const sentences = cleaned.split(/[。\n]+/).map(s => s.trim()).filter(s => s.length >= 15 && s.length <= 60 && !s.startsWith('需注意'));
+    if (sentences.length) return sentences[0];
+    return cleaned.slice(0, 50) + (cleaned.length > 50 ? '…' : '');
+  }
+
+  function extractCardExcerpt(body) {
+    if (!body) return '暂无正文内容。';
+    const cleaned = body.replace(/\[\d+\]/g, '').trim();
+    const paragraphs = cleaned.split(/\r?\n+/).map(p => p.trim()).filter(p => p && !p.startsWith('需注意') && !p.startsWith('注：'));
+    const text = paragraphs.join('\n\n');
+    return text.length > 180 ? text.slice(0, 175) + '…' : text;
+  }
+
+  function drawRoundRect(ctx, x, y, width, height, radius) {
+    if (typeof ctx.roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, radius);
+      return;
+    }
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  function getWrappedLines(ctx, text, maxWidth) {
+    const chars = [...text];
+    const lines = [];
+    let current = '';
+    for (let i = 0; i < chars.length; i++) {
+      const test = current + chars[i];
+      if (ctx.measureText(test).width > maxWidth && i > 0) {
+        lines.push(current);
+        current = chars[i];
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 10) {
+    const lines = getWrappedLines(ctx, text, maxWidth);
+    let currentY = y;
+    for (let i = 0; i < lines.length; i++) {
+      if (i >= maxLines) break;
+      let lineText = lines[i];
+      if (i === maxLines - 1 && lines.length > maxLines) {
+        lineText = lineText.slice(0, -1) + '…';
+      }
+      ctx.fillText(lineText, x, currentY);
+      currentY += lineHeight;
+    }
+    return currentY;
+  }
+
+  function renderCardToCanvas(ctx, item, mode, theme) {
+    ctx.fillStyle = theme.bg;
+    ctx.fillRect(0, 0, 1080, 1440);
+
+    ctx.strokeStyle = theme.borderColor;
+    ctx.lineWidth = 3;
+    drawRoundRect(ctx, 36, 36, 1080 - 72, 1440 - 72, 32);
+    ctx.stroke();
+
+    // 1. Category Tag at top
+    ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = theme.accent;
+    ctx.fillText('「 岁时生活问答 」', 64, 100);
+
+    // 2. Question Title
+    const customTitle = $('#card-custom-question')?.value.trim();
+    const questionTitle = customTitle || item.title || '无标题';
+    ctx.font = 'bold 50px system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = theme.color;
+    let currentY = wrapText(ctx, questionTitle, 64, 175, 952, 68, 2);
+
+    // 3. Subtitle / Reflection
+    currentY += 24;
+    const customSub = $('#card-custom-sub')?.value.trim();
+    const subTitle = customSub || item.angle || '顺应物候与时令生活的小小体悟';
+    ctx.font = '500 24px system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    const subLines = getWrappedLines(ctx, subTitle, 952 - 40);
+    const subBoxH = subLines.length * 36 + 28;
+    drawRoundRect(ctx, 64, currentY, 952, subBoxH, 12);
+    ctx.fillStyle = theme.angleBg;
+    ctx.fill();
+    ctx.strokeStyle = theme.angleBorder;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = theme.angleColor;
+    let sy = currentY + 34;
+    for (const line of subLines) {
+      ctx.fillText(line, 84, sy);
+      sy += 36;
+    }
+    currentY += subBoxH + 48;
+
+    // 4. Content Body
+    if (mode === 'question') {
+      const customPoint = $('#card-custom-point')?.value.trim();
+      const hook = generateQuestionHook(item);
+      const singlePoint = customPoint || hook.point || '顺应物候与时令，如何用一件生活小事安顿身心？';
+
+      // 单句核心疑问句，无圆标问号，大字通透排版
+      const qBoxY = currentY + 40;
+      const qBoxH = 260;
+      drawRoundRect(ctx, 64, qBoxY, 952, qBoxH, 20);
+      ctx.fillStyle = theme.quoteBg;
+      ctx.fill();
+      ctx.strokeStyle = theme.quoteBorder;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      ctx.font = 'bold 36px system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = theme.color;
+      ctx.textAlign = 'center';
+      wrapText(ctx, singlePoint, 540, qBoxY + 115, 860, 56, 3);
+      ctx.textAlign = 'left';
+    } else if (mode === 'zen_quote') {
+      const qBoxY = currentY + 20;
+      const qBoxH = 340;
+      drawRoundRect(ctx, 64, qBoxY, 952, qBoxH, 16);
+      ctx.fillStyle = theme.quoteBg;
+      ctx.fill();
+      ctx.strokeStyle = theme.quoteBorder;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 8]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = 'bold 84px Georgia, serif';
+      ctx.fillStyle = theme.accent;
+      ctx.fillText('“', 96, qBoxY + 80);
+
+      ctx.font = 'italic 500 32px system-ui, -apple-system, "PingFang SC", sans-serif';
+      ctx.fillStyle = theme.color;
+      wrapText(ctx, `${questionTitle}\n${subTitle}`, 96, qBoxY + 130, 952 - 64, 52, 3);
+
+      ctx.font = '500 24px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = theme.color;
+      ctx.globalAlpha = 0.7;
+      ctx.textAlign = 'right';
+      ctx.fillText('—— 下滑阅读全文', 64 + 952 - 32, qBoxY + qBoxH - 32);
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = 1.0;
+    } else if (mode === 'summary') {
+      const points = customPoints.length ? customPoints : extractCardPoints(item.body);
+      let py = currentY + 10;
+      points.slice(0, 3).forEach((p, idx) => {
+        ctx.beginPath();
+        ctx.arc(88, py + 14, 20, 0, Math.PI * 2);
+        ctx.fillStyle = theme.pillBg;
+        ctx.fill();
+        ctx.fillStyle = theme.pillColor;
+        ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(idx + 1), 88, py + 22);
+        ctx.textAlign = 'left';
+
+        ctx.fillStyle = theme.color;
+        ctx.font = '500 28px system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+        py = wrapText(ctx, p, 126, py + 22, 952 - 64, 44, 2);
+        py += 36;
+      });
+    }
+
+    // 5. Bottom Swipe Hint & Evidence
+    ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = theme.accent;
+    ctx.globalAlpha = 0.85;
+    ctx.textAlign = 'center';
+    ctx.fillText('下滑查看笔记完整拆解 ▾', 540, 1325);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1.0;
+
+    const sourceNames = (item.sourceIds || []).map(id => state.sources.find(s => s.id === id)?.title).filter(Boolean);
+    if (sourceNames.length > 0) {
+      ctx.beginPath();
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 6]);
+      ctx.moveTo(64, 1355);
+      ctx.lineTo(1080 - 64, 1355);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const sourceStr = '依据：' + sourceNames.join(' / ');
+      ctx.font = '22px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = theme.color;
+      ctx.globalAlpha = 0.65;
+      ctx.textAlign = 'center';
+      ctx.fillText(sourceStr.length > 40 ? sourceStr.slice(0, 38) + '…' : sourceStr, 540, 1390);
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = 1.0;
+    }
+  }
+
+  function downloadCardImage(item, mode, themeKey) {
+    const theme = CARD_THEMES[themeKey] || CARD_THEMES['theme-warm'];
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1440;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      showToast('浏览器不支持 Canvas 图像导出', true);
+      return;
+    }
+    renderCardToCanvas(ctx, item, mode, theme);
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const safeTitle = (item.title || 'card_cover').replace(/[/\\?%*:|"<>]/g, '_').slice(0, 30);
+      const filename = `${safeTitle}_3-4通用图文封面卡片.png`;
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`已成功导出 3:4 通用图文封面卡片：${filename}！可直接上传小红书或抖音图文。`);
+    } catch (err) {
+      showToast('图片导出失败：' + (err.message || '未知错误'), true);
+    }
+  }
+
+  function renderCardPreview(item, mode, themeKey) {
+    if (!item) return;
+    const viewport = $('#card-preview-viewport');
+    if (!viewport) return;
+
+    viewport.className = `card-preview-viewport ${themeKey}`;
+
+    const customTitle = $('#card-custom-question')?.value.trim();
+    const customSub = $('#card-custom-sub')?.value.trim();
+
+    text('#card-tag-text', '「 岁时生活问答 」');
+    text('#card-title-text', customTitle || item.title || '无标题');
+    text('#card-angle-text', customSub || item.angle || '顺应物候与时令生活的小小体悟');
+
+    const bodyEl = $('#card-content-body');
+    bodyEl.replaceChildren();
+
+    if (mode === 'question') {
+      const customPoint = $('#card-custom-point')?.value.trim();
+      const hook = generateQuestionHook(item);
+      const singlePoint = customPoint || hook.point || '顺应物候与时令，如何用一件生活小事安顿身心？';
+
+      const box = el('div', 'card-single-question');
+      const textP = el('p', 'card-single-question-text', singlePoint);
+      box.append(textP);
+      bodyEl.append(box);
+    } else if (mode === 'zen_quote') {
+      const box = el('div', 'card-quote-box');
+      const mark = el('span', 'card-quote-mark', '“');
+      const textP = el('p', 'card-quote-text', `${customTitle || item.title || ''}\n${customSub || item.angle || ''}`);
+      const auth = el('div', '', '—— 下滑阅读全文');
+      auth.style.textAlign = 'right';
+      auth.style.fontSize = '11px';
+      auth.style.opacity = '0.75';
+      auth.style.marginTop = '6px';
+      box.append(mark, textP, auth);
+      bodyEl.append(box);
+    } else if (mode === 'summary') {
+      const points = extractCardPoints(item.body);
+      points.slice(0, 3).forEach((point, idx) => {
+        const row = el('div', 'card-point-row');
+        const pill = el('span', 'card-point-pill', String(idx + 1));
+        const pointText = el('span', 'card-point-text', point);
+        row.append(pill, pointText);
+        bodyEl.append(row);
+      });
+    }
+
+    const sourceNames = (item.sourceIds || []).map(id => state.sources.find(s => s.id === id)?.title).filter(Boolean);
+    const sourceEl = $('#card-source-tag');
+    if (sourceNames.length > 0) {
+      if (sourceEl) {
+        sourceEl.hidden = false;
+        sourceEl.textContent = '依据：' + sourceNames.join(' / ');
+      }
+    } else {
+      if (sourceEl) sourceEl.hidden = true;
+    }
+  }
+
+  function renderHashtagsChips(item) {
+    const container = $('#card-tags-container');
+    if (!container) return;
+    container.replaceChildren();
+    const tags = generateHashtags(item);
+    tags.forEach((tag, idx) => {
+      const chip = el('button', 'topic-tag-chip' + (idx < 2 ? ' hot' : ''), tag);
+      chip.type = 'button';
+      chip.title = '点击单独复制此话题';
+      chip.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(tag);
+          }
+          showToast(`已复制话题：${tag}`);
+        } catch {
+          showToast(`复制失败：${tag}`, true);
+        }
+      });
+      container.append(chip);
+    });
+  }
+
+  function openCardGenerator(item) {
+    if (!item) return;
+    currentCardItem = item;
+    const modal = $('#card-generator-modal');
+    if (!modal) return;
+    modal.hidden = false;
+
+    $$('#card-theme-options .theme-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === currentCardTheme);
+    });
+
+    const hook = generateQuestionHook(item);
+    if ($('#card-custom-question')) $('#card-custom-question').value = hook.title;
+    if ($('#card-custom-sub')) $('#card-custom-sub').value = hook.sub;
+    if ($('#card-custom-point')) $('#card-custom-point').value = hook.point;
+
+    const modeSelect = $('#card-extract-mode');
+    if (modeSelect) modeSelect.value = currentCardMode;
+
+    const pointGroup = $('#card-custom-point-group');
+    if (pointGroup) pointGroup.hidden = currentCardMode === 'zen_quote';
+
+    renderHashtagsChips(item);
+    renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+  }
+
+  function closeCardGenerator() {
+    const modal = $('#card-generator-modal');
+    if (modal) modal.hidden = true;
+  }
+
+  function renderPublish() {
+    const pendingTarget = $('#publish-pending-list');
+    const historyTarget = $('#publish-history-list');
+    if (!pendingTarget || !historyTarget) return;
+
+    pendingTarget.replaceChildren();
+    historyTarget.replaceChildren();
+
+    const approvedItems = state.items.filter(item => item.status === 'approved' && !item.archived);
+    const publishedItems = newest(state.items.filter(item => item.status === 'published'), 'publishedAt');
+
+    text('#publish-count-chip', number(approvedItems.length) + ' 篇待发布');
+
+    if (!approvedItems.length) {
+      pendingTarget.append(emptyState(
+        '暂无待发布内容',
+        '在「创作空间」完成草稿起草、通过内置规则检查并勾选人工确认后，内容将进入待发布队列。',
+        'check',
+        '前往创作空间',
+        () => navigate('studio'),
+        true
+      ));
+    } else {
+      approvedItems.forEach((item, index) => {
+        // Styled like task queue card (.content-card.selected)
+        const card = el('div', 'content-card selected publish-task-card');
+
+        // Top line: 内容 01 + 待发布 status pill
+        const top = el('span', 'content-card-top');
+        const cardIndex = el('span', 'content-card-index', '内容 ' + String(index + 1).padStart(2, '0'));
+        top.append(cardIndex, statusPill(item.status));
+
+        // Title: h3
+        const title = el('h3', '', item.title);
+
+        // Angle paragraph: p
+        const angle = el('p', '', item.angle || '结合实际体验与参考资料，完成内容发布。');
+
+        // Reason or excerpt: content-reason
+        const charCount = [...(item.body || '')].length;
+        const excerptText = item.body ? item.body.trim().slice(0, 160) + (item.body.length > 160 ? '…' : '') : '';
+        const reason = el('p', 'content-reason', item.reason ? '选题理由：' + item.reason : (excerptText ? '正文预览：' + excerptText : '已通过规则检查与人工确认'));
+
+        // Foot line: 预计时间 · 第 X 版 · 字符数 + Action Buttons
+        const foot = el('span', 'content-card-foot');
+        const estimate = el('span');
+        estimate.append(icon('clock'), document.createTextNode('预计 ' + number(item.estimatedMinutes) + ' 分钟 · 第 ' + number(item.revision) + ' 版 · ' + charCount + ' 字符'));
+
+        const actionGroup = el('div', 'publish-card-actions-compact');
+
+        const cardBtn = button('', 'btn btn-secondary btn-small', (e) => {
+          e.stopPropagation();
+          openCardGenerator(item);
+        });
+        cardBtn.append(icon('spark'), document.createTextNode(' 生成图文卡片'));
+
+        const copyBtn = button('', 'btn btn-secondary btn-small', async (e) => {
+          e.stopPropagation();
+          try {
+            const fullText = (item.title ? item.title + '\n\n' : '') + (item.body || '');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(fullText);
+            } else {
+              const ta = document.createElement('textarea');
+              ta.value = fullText;
+              ta.style.position = 'fixed';
+              ta.style.opacity = '0';
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand('copy');
+              document.body.removeChild(ta);
+            }
+            showToast('正文与标题已复制到剪贴板，可粘贴至小红书等平台发布！');
+          } catch {
+            showToast('复制失败，请进入创作空间手动复制。');
+          }
+        });
+        copyBtn.append(icon('file'), document.createTextNode(' 一键复制正文'));
+
+        const editBtn = button('', 'btn btn-quiet btn-small', (e) => {
+          e.stopPropagation();
+          openItem(item.id);
+        });
+        editBtn.append(icon('pen'), document.createTextNode(' 创作空间修改'));
+
+        actionGroup.append(cardBtn, copyBtn, editBtn);
+        foot.append(estimate, actionGroup);
+
+        // Seamless inline publish URL register row
+        const form = el('form', 'publish-register-bar');
+        const label = el('span', 'publish-register-label', '登记发布网址：');
+        const input = el('input');
+        input.type = 'url';
+        input.placeholder = '在平台发布后粘贴网址（https://...）并登记以进入复盘';
+        input.required = true;
+        input.autocomplete = 'off';
+
+        const submitBtn = button('登记已发布网址', 'btn btn-primary btn-small', () => {});
+        submitBtn.type = 'submit';
+
+        const errorEl = el('p', 'form-error full-width');
+        errorEl.setAttribute('role', 'alert');
+        errorEl.hidden = true;
+
+        form.append(label, input, submitBtn, errorEl);
+
+        form.addEventListener('submit', event => {
+          event.preventDefault();
+          const val = input.value.trim();
+          publishItemById(item.id, val, submitBtn, errorEl);
+        });
+
+        card.append(top, title, angle, reason, foot, form);
+        pendingTarget.append(card);
+      });
+    }
+
+    // Render published items history
+    if (!publishedItems.length) {
+      historyTarget.append(el('p', 'tiny muted', '暂无已登记发布的内容。在上方登记发布网址后，内容将进入已发布列表，并可在「数据复盘」中追踪运营指标。'));
+    } else {
+      publishedItems.forEach(item => {
+        const row = el('div', 'publish-history-row');
+        const left = el('div', 'publish-history-left');
+        const urlLink = externalLink(item.publishedUrl, '打开平台链接 ↗');
+        const metaLine = el('div', 'publish-history-meta');
+        metaLine.append(el('span', '', '发布时间：' + date(item.publishedAt) + ' · '), urlLink);
+        left.append(
+          el('strong', 'publish-history-title', item.title),
+          metaLine
+        );
+        const right = el('div', 'publish-history-right');
+        const metricsBtn = button('', 'btn btn-small btn-secondary', () => goToMetrics(item.id));
+        metricsBtn.append(icon('chart'), document.createTextNode(' 录入/查看运营指标'));
+        right.append(metricsBtn);
+
+        row.append(left, right);
+        historyTarget.append(row);
+      });
+    }
   }
 
   function renderMetricsOptions() {
@@ -1007,11 +1773,16 @@ export class AiConnectionStatus {
   function renderState() {
     if (!state) return;
     renderOverview();
-    renderFilters();
-    renderContentList();
+    renderPlanning();
+    renderPublish();
     renderSources();
-    if (ui.editorRefresh || (!editorDirty() && !publishDirty())) renderEditor();
-    else syncEditorActions();
+    if (ui.page === 'studio') {
+      if (ui.editorRefresh || (!editorDirty() && !publishDirty())) renderStudio();
+      else syncEditorActions();
+    } else {
+      if (ui.editorRefresh || (!editorDirty() && !publishDirty())) renderEditor();
+      else syncEditorActions();
+    }
     renderMetricsOptions();
     renderReport();
     renderNavigation();
@@ -1082,7 +1853,7 @@ export class AiConnectionStatus {
     event.preventDefault();
     const target = trigger.dataset.page || trigger.dataset.go;
     if (target === 'content') {
-      navigate('studio');
+      navigate('planning');
       $('#idea-input')?.focus();
       return;
     }
@@ -1324,7 +2095,7 @@ export class AiConnectionStatus {
     });
   });
 
-  $('#publish-form').addEventListener('submit', event => {
+  $('#publish-form')?.addEventListener('submit', event => {
     event.preventDefault();
     const item = currentItem();
     const value = $('#published-url').value.trim();
@@ -1454,6 +2225,118 @@ export class AiConnectionStatus {
     }
   });
 
+  $('#preview-card-btn')?.addEventListener('click', () => {
+    const item = currentItem();
+    if (!item) {
+      showToast('请先选择或创建一篇内容。', true);
+      return;
+    }
+    const editorTitle = $('#editor-title')?.value.trim();
+    const editorBody = $('#editor-body')?.value.trim();
+    const virtualItem = {
+      ...item,
+      title: editorTitle || item.title,
+      body: editorBody !== undefined ? editorBody : item.body,
+    };
+    openCardGenerator(virtualItem);
+  });
+
+  $('#card-gen-close')?.addEventListener('click', closeCardGenerator);
+  $('#card-generator-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'card-generator-modal') closeCardGenerator();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#card-generator-modal')?.hidden) {
+      closeCardGenerator();
+    }
+  });
+
+  $$('#card-theme-options .theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentCardTheme = btn.dataset.theme || 'theme-warm';
+      $$('#card-theme-options .theme-btn').forEach(b => b.classList.toggle('active', b === btn));
+      renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+    });
+  });
+
+  $('#card-extract-mode')?.addEventListener('change', (e) => {
+    currentCardMode = e.target.value || 'question';
+    const pointGroup = $('#card-custom-point-group');
+    if (pointGroup) pointGroup.hidden = currentCardMode !== 'question';
+    renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+  });
+
+  $('#card-custom-question')?.addEventListener('input', () => {
+    if (currentCardItem) renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+  });
+
+  $('#card-custom-sub')?.addEventListener('input', () => {
+    if (currentCardItem) renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+  });
+
+  $('#card-custom-point')?.addEventListener('input', () => {
+    if (currentCardItem) renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+  });
+
+  $('#card-regen-question-btn')?.addEventListener('click', () => {
+    if (!currentCardItem) return;
+    const hook = generateQuestionHook(currentCardItem);
+    if ($('#card-custom-question')) $('#card-custom-question').value = hook.title;
+    if ($('#card-custom-sub')) $('#card-custom-sub').value = hook.sub;
+    if ($('#card-custom-point')) $('#card-custom-point').value = hook.point;
+    renderHashtagsChips(currentCardItem);
+    renderCardPreview(currentCardItem, currentCardMode, currentCardTheme);
+    showToast('已重新提取并刷新封面疑问句与话题！');
+  });
+
+  $('#card-copy-tags-btn')?.addEventListener('click', async () => {
+    if (!currentCardItem) return;
+    const tags = generateHashtags(currentCardItem).join(' ');
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(tags);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = tags;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      showToast(`已成功复制全部热门话题：${tags}`);
+    } catch {
+      showToast('复制话题标签失败，请手动选取复制。', true);
+    }
+  });
+
+  $('#download-card-png-btn')?.addEventListener('click', () => {
+    if (!currentCardItem) return;
+    downloadCardImage(currentCardItem, currentCardMode, currentCardTheme);
+  });
+
+  $('#copy-text-from-modal-btn')?.addEventListener('click', async () => {
+    if (!currentCardItem) return;
+    const tags = generateHashtags(currentCardItem).join(' ');
+    const fullText = (currentCardItem.title ? currentCardItem.title + '\n\n' : '') +
+      (currentCardItem.body || '') +
+      '\n\n' + tags;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullText);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = fullText;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      showToast('文案与热门话题已成功复制！可直接在小红书、抖音图文粘贴发布。');
+    } catch {
+      showToast('复制文案失败，请在页面手动复制。', true);
+    }
+  });
+
   let currentDiagnosed = null;
   $('#diagnose-idea-btn')?.addEventListener('click', event => {
     const input = $('#idea-input');
@@ -1471,9 +2354,9 @@ export class AiConnectionStatus {
       $('#idea-diagnosis-result').hidden = false;
       const badge = $('#idea-fit-badge');
       const fits = {
-        recommended: { text: '🟢 契合推荐', cls: 'status-approved' },
-        needs_materials: { text: '🟡 缺少资料', cls: 'status-reviewed' },
-        off_topic: { text: '🔴 偏离定位', cls: 'status-draft' },
+        recommended: { text: '契合推荐', cls: 'status-approved' },
+        needs_materials: { text: '缺少资料', cls: 'status-reviewed' },
+        off_topic: { text: '偏离定位', cls: 'status-draft' },
       };
       const fitInfo = fits[res.fit] || fits.recommended;
       badge.textContent = fitInfo.text;
@@ -1600,7 +2483,7 @@ export class AiConnectionStatus {
       }
 
       const actions = el('div', 'archived-card-actions');
-      const unarchiveBtn = el('button', 'btn btn-secondary btn-small', '↩️ 恢复到任务队列');
+      const unarchiveBtn = el('button', 'btn btn-secondary btn-small', '恢复到任务队列');
       unarchiveBtn.type = 'button';
       unarchiveBtn.title = '将该选题移回活跃任务队列，重新计入每周工时预算';
       unarchiveBtn.addEventListener('click', async () => {
@@ -1609,7 +2492,7 @@ export class AiConnectionStatus {
         renderArchivedList();
       });
 
-      const deleteBtn = el('button', 'btn btn-quiet btn-danger-text btn-small', '🗑️ 彻底删除');
+      const deleteBtn = el('button', 'btn btn-quiet btn-danger-text btn-small', '彻底删除');
       deleteBtn.type = 'button';
       deleteBtn.title = '永久删除此选题（不可恢复）';
       deleteBtn.addEventListener('click', async () => {

@@ -122,11 +122,13 @@ const PAGE_SCRIPT = String.raw`async () => {
   });
 
   await step('创建计划并生成模板草稿', async () => {
-    await go('studio');
+    await go('planning');
     set('#plan-count', '1');
     $('#plan-form').requestSubmit();
     await waitIdle();
     await waitFor(() => document.querySelectorAll('.content-card').length === 1, '计划未创建');
+    document.querySelector('.content-card').click();
+    await waitFor(() => !$('#page-studio').hidden, '点击计划后未进入创作空间');
     $('#generate-draft').click();
     await waitIdle();
     if (!($('#editor-body').value || '').includes('模板草稿')) throw new Error('模板草稿未生成');
@@ -146,11 +148,25 @@ const PAGE_SCRIPT = String.raw`async () => {
     await waitFor(() => $('#editor-status').textContent.includes('待发布'), '未进入待发布');
   });
 
+  await step('生成小红书 3:4 图文卡片并切换排版与主题', async () => {
+    $('#preview-card-btn').click();
+    await waitFor(() => !$('#card-generator-modal').hidden, '卡片生成弹窗未显示');
+    if (!$('#card-title-text').textContent) throw new Error('卡片标题未渲染');
+    set('#card-extract-mode', 'zen_quote');
+    await waitFor(() => document.querySelector('.card-quote-box') !== null, '金句模式未渲染');
+    document.querySelector('#card-theme-options [data-theme="theme-sage"]').click();
+    if (!$('#card-preview-viewport').classList.contains('theme-sage')) throw new Error('主题未切换为青竹');
+    $('#card-gen-close').click();
+    await waitFor(() => $('#card-generator-modal').hidden, '弹窗未关闭');
+  });
+
   await step('登记发布网址并录入数据', async () => {
-    set('#published-url', 'https://example.com/browser-regression-not-a-real-post');
-    $('#publish-form').requestSubmit();
+    await go('publish');
+    await waitFor(() => document.querySelector('.publish-register-bar input') !== null, '待发布登记表单未出现');
+    set('.publish-register-bar input', 'https://example.com/browser-regression-not-a-real-post');
+    $('.publish-register-bar button[type="submit"]').click();
     await waitIdle();
-    await waitFor(() => $('#editor-status').textContent.includes('已登记发布'), '未登记发布');
+    await waitFor(() => document.querySelectorAll('.publish-history-row').length > 0, '未进入已发布历史');
     await go('report');
     await waitFor(() => $('#metrics-item').options.length > 0, '复盘下拉未加载');
     set('#metrics-form [name="views"]', '100');
@@ -176,7 +192,7 @@ const NARROW_SCRIPT = String.raw`async () => {
     observer.observe(document.body, { subtree: true, attributes: true });
   });
   const overflow = [];
-  for (const page of ['overview', 'studio', 'sources', 'report', 'roadmap']) {
+  for (const page of ['overview', 'planning', 'studio', 'publish', 'sources', 'report', 'settings']) {
     $('[data-page="' + page + '"]').click();
     await waitFor(() => !$('#page-' + page).hidden);
     if (document.documentElement.scrollWidth > window.innerWidth + 1) overflow.push(page);

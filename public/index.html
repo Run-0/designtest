@@ -47,7 +47,9 @@
     <p class="nav-caption">工作空间</p>
     <nav class="nav-list">
       <a href="#overview" data-page="overview" class="nav-link active" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span>工作台</span></a>
+      <a href="#planning" data-page="planning" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>选题策划</span></a>
       <a href="#studio" data-page="studio" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><span>创作空间</span></a>
+      <a href="#publish" data-page="publish" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>待发布</span></a>
       <a href="#sources" data-page="sources" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>知识库</span></a>
       <a href="#report" data-page="report" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg><span>数据复盘</span></a>
       <a href="#settings" data-page="settings" class="nav-link"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span>系统设置</span></a>
@@ -77,18 +79,24 @@
           <details class="panel profile-panel" id="profile-details"><summary><span><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><strong>账号工作底稿</strong><span class="muted" id="profile-summary">你的创作方向与每周预算</span></span><span class="summary-action">编辑设置 <span aria-hidden="true">⌄</span></span></summary><div class="details-body"><p class="muted form-intro">默认假设：小红书效率工具图文账号，面向独立内容创作者。它只是起点，你可以按真实情况调整；不会连接平台账号。</p><form id="profile-form" data-track><div class="form-grid"><label class="field">工作空间 / 账号名称<input name="name" required maxlength="80" autocomplete="off"></label><label class="field">内容平台<input name="platform" required maxlength="100" placeholder="例如：小红书（图文）"></label><label class="field">目标受众<input name="audience" required maxlength="300" placeholder="例如：希望提升效率的独立创作者"></label><label class="field">表达语气<input name="tone" required maxlength="300" placeholder="例如：真诚、简洁、不夸大效果"></label><label class="field field-wide">内容定位<textarea name="positioning" required rows="2" maxlength="600"></textarea></label><label class="field">每周可投入时间（小时）<input name="weeklyHours" type="number" min="1" max="40" step="1" required inputmode="numeric"><small>一条计划预计 40 分钟，优先量力而行。</small></label><label class="field">当前目标<input name="goal" required maxlength="600" placeholder="例如：每周完成 3 篇有资料依据的内容"></label></div><p class="form-error" id="profile-error" role="alert" hidden></p><div class="form-footer"><span class="muted tiny">这是本地工作底稿，不是平台资料。</span><button class="btn btn-primary" type="submit">保存工作底稿</button></div></form></div></details>
         </section>
 
-        <section id="page-studio" class="page" hidden aria-labelledby="studio-title">
-          <div class="studio-header">
-            <div class="studio-header-title">
-              <h1 id="studio-title" tabindex="-1">内容运营工作台</h1>
-              <span class="studio-tag">独立创作 · 选题 · 写作 · 复盘</span>
+        <section id="page-planning" class="page" hidden aria-labelledby="planning-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">从灵感触动到周度安排，一步步沉淀选题</p>
+              <h1 id="planning-title" tabindex="-1">选题策划<span class="heading-dot">。</span></h1>
+              <p class="page-subtitle">诊断突发想法、基于工时规划新选题、管理选题任务队列；点击任务卡片即可直接进入创作空间写作。</p>
             </div>
-            <span class="page-chip"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg>人工把关模式</span>
+            <div class="page-heading-actions">
+              <span class="page-chip" id="planning-budget-chip">
+                <svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>
+                <span id="planning-budget-text">工时预算读取中...</span>
+              </span>
+            </div>
           </div>
 
-          <div class="studio-workbench">
-            <!-- Column 1: Inspiration & Planning & Queue -->
-            <aside class="workbench-col col-planning">
+          <div class="planning-layout">
+            <!-- Planning Column 1: 灵感可行性诊断 + 选题规划 -->
+            <div class="planning-tools-col">
               <!-- Card 1: Inspiration Feasibility Diagnoser -->
               <section class="panel idea-card" aria-labelledby="idea-diagnose-title">
                 <div class="card-head">
@@ -113,7 +121,7 @@
                     <p id="idea-rec-angle" class="tiny muted"></p>
                   </div>
                   <button class="btn btn-primary btn-small full-width" id="adopt-diagnosed-idea-btn" type="button">
-                    ➕ 采纳并加入队列
+                    采纳并加入队列
                   </button>
                 </div>
               </section>
@@ -162,127 +170,192 @@
                   <p class="form-error full-width" id="ai-plan-error" role="alert" hidden></p>
                 </div>
               </section>
+            </div>
 
-              <!-- Card 3: Topic Task Queue -->
+            <!-- Planning Column 2: 任务队列 -->
+            <div class="planning-queue-col">
               <section class="panel queue-card" aria-labelledby="queue-section-title">
                 <div class="queue-heading">
-                  <h2 id="queue-section-title">任务队列</h2>
+                  <div>
+                    <h2 id="queue-section-title">任务队列</h2>
+                    <p class="muted tiny">选择下方任意选题，立即跳转至创作空间进行专注编辑与 AI 起草</p>
+                  </div>
                   <div class="filter-bar filter-bar-compact" id="status-filters" role="group" aria-label="按内容状态筛选"></div>
                 </div>
-                <div class="content-list content-list-compact" id="content-list" aria-label="内容任务队列"></div>
-              </section>
-            </aside>
-
-            <!-- Column 2: Focus Writing & Quality Check -->
-            <div class="workbench-col col-editor">
-              <section class="panel editor-panel" id="editor-panel" aria-label="内容编辑与检查">
-                <div id="editor-empty" class="empty-state editor-empty">
-                  <span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg></span>
-                  <h2>给一个想法，留出专注空间</h2>
-                  <p>从左侧任务队列中选择一篇内容开始编辑，或者输入突发灵感让 AI 智能体为你规划选题。</p>
-                </div>
-
-                <div id="editor-content" hidden>
-                  <div class="editor-topline">
-                    <div class="editor-status-wrap">
-                      <span id="editor-status"></span>
-                      <span class="muted tiny" id="editor-meta"></span>
-                    </div>
-                    <span class="save-indicator" id="save-indicator" role="status">已保存</span>
-                  </div>
-
-                  <p class="editor-angle-banner" id="editor-angle"></p>
-                  <div class="editor-flow" aria-label="内容处理步骤">
-                    <span data-flow="draft">1 起草</span><i aria-hidden="true">→</i>
-                    <span data-flow="review">2 规则检查</span><i aria-hidden="true">→</i>
-                    <span data-flow="approve">3 人工确认</span><i aria-hidden="true">→</i>
-                    <span data-flow="publish">4 发布登记</span>
-                  </div>
-
-                  <form id="editor-form">
-                    <div class="field-title-wrap">
-                      <label class="sr-only" for="editor-title">内容标题</label>
-                      <input id="editor-title" name="title" required maxlength="200" placeholder="内容标题...">
-                    </div>
-                    <div class="field-body-wrap">
-                      <div class="body-toolbar">
-                        <span class="body-label">正文草稿</span>
-                        <span id="body-count" class="word-count-pill count-short">0 字符</span>
-                      </div>
-                      <textarea id="editor-body" name="body" required rows="14" maxlength="20000" placeholder="点击「AI 资料起草」或「生成模板草稿」开始写作..."></textarea>
-                    </div>
-
-                    <div class="editor-buttons">
-                      <button class="btn btn-primary" id="save-draft" type="submit">💾 保存修改</button>
-                      <button class="btn btn-secondary" id="ai-draft" type="button" disabled aria-describedby="ai-draft-hint">
-                        <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 🤖 AI 资料起草
-                      </button>
-                      <button class="btn btn-secondary" id="generate-draft" type="button">
-                        <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> <span>生成模板草稿</span>
-                      </button>
-                      <button class="btn btn-secondary" id="copy-draft-btn" type="button">
-                        📋 一键复制正文
-                      </button>
-                      <button class="btn btn-quiet" id="export-draft" type="button">
-                        <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> <span>导出 TXT</span>
-                      </button>
-                      <button class="btn btn-quiet" id="archive-draft-btn" type="button" title="移入归档，从主队列隐去并释放本周工时预算">
-                        <span>📦 移入归档</span>
-                      </button>
-                    </div>
-                  </form>
-
-                  <p class="form-error" id="editor-error" role="alert" hidden></p>
-                  <p class="tiny muted" id="editor-help">修改标题或正文后，已有检查与人工确认会失效，需要重新检查。</p>
-                  <p class="tiny muted draft-note" id="ai-draft-hint">AI 草稿连接状态读取中。</p>
-                  <a href="/connect.html" class="text-button" id="editor-connect" data-connect hidden>前往配置 AI 草稿连接 →</a>
-
-                  <section id="editor-ai" class="ai-details" aria-label="AI 草稿来源与工具摘要" hidden></section>
-
-                  <section class="source-references-section" aria-labelledby="references-title">
-                    <div class="section-heading">
-                      <h3 id="references-title">
-                        <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>
-                        <span>本文引用资料 (<span id="reference-count">0</span>)</span>
-                      </h3>
-                      <button class="text-button" type="button" data-go="sources">
-                        前往知识库管理全部参考资料 <span aria-hidden="true">→</span>
-                      </button>
-                    </div>
-                    <div id="editor-sources" class="editor-sources-preview"></div>
-                  </section>
-
-                  <section class="review-section" aria-labelledby="review-title">
-                    <div class="section-heading">
-                      <h3 id="review-title"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> 发布前规则检查</h3>
-                      <button class="btn btn-small btn-secondary" id="review-draft" type="button">运行规则检查</button>
-                    </div>
-                    <p class="tiny muted">程序检查内置规则（标题、字数、敏感承诺等），不替代人工事实判断。</p>
-                    <div id="review-results"></div>
-                    <form id="approve-form">
-                      <label class="checkbox-field">
-                        <input type="checkbox" id="human-confirm">
-                        <span>我已人工核实当前版本的内容及引用资料，尤其是检查提醒项。</span>
-                      </label>
-                      <button class="btn btn-secondary" id="approve-draft" type="submit">人工确认可发布</button>
-                      <p class="tiny muted" id="approve-hint"></p>
-                    </form>
-                  </section>
-
-                  <section class="publish-section" aria-labelledby="publish-title">
-                    <h3 id="publish-title"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg> 手动发布登记</h3>
-                    <p class="tiny muted">自行在小红书等平台发布后，在此登记网址以进入复盘阶段。</p>
-                    <form id="publish-form" data-track>
-                      <label class="field">已发布内容的网址
-                        <input id="published-url" name="url" type="url" placeholder="https://…" required autocomplete="off">
-                      </label>
-                      <button class="btn btn-primary" id="publish-item" type="submit">登记已发布网址</button>
-                    </form>
-                    <div id="published-info" hidden></div>
-                  </section>
-                </div>
+                <div class="content-list content-list-spacious" id="content-list" aria-label="内容任务队列"></div>
               </section>
             </div>
+          </div>
+        </section>
+
+        <section id="page-studio" class="page" hidden aria-labelledby="studio-title">
+          <div class="studio-header">
+            <div class="studio-header-title">
+              <h1 id="studio-title" tabindex="-1">创作空间</h1>
+              <span class="studio-tag" id="studio-active-title">专注正文写作 · 规则检查 · 人工确认</span>
+            </div>
+            <div class="studio-actions-quick">
+              <button class="btn btn-small btn-secondary" type="button" data-go="planning">
+                <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> 选题策划 / 任务队列 ↗
+              </button>
+            </div>
+          </div>
+
+          <div class="studio-workbench-focused">
+            <section class="panel editor-panel" id="editor-panel" aria-label="内容编辑与检查">
+              <div id="editor-empty" class="empty-state editor-empty">
+                <span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg></span>
+                <h2>给一个想法，留出专注空间</h2>
+                <p>当前未选定编辑内容。请先在「选题策划」选择一个选题开始编辑，或者规划新选题。</p>
+                <button class="btn btn-primary" type="button" data-go="planning">
+                  前往「选题策划」选择或规划选题 →
+                </button>
+              </div>
+
+              <div id="editor-content" hidden>
+                <div class="editor-topline">
+                  <div class="editor-status-wrap">
+                    <span id="editor-status"></span>
+                    <span class="muted tiny" id="editor-meta"></span>
+                  </div>
+                  <span class="save-indicator" id="save-indicator" role="status">已保存</span>
+                </div>
+
+                <p class="editor-angle-banner" id="editor-angle"></p>
+                <div class="editor-flow" aria-label="内容处理步骤">
+                  <span data-flow="draft">1 起草</span><i aria-hidden="true">→</i>
+                  <span data-flow="review">2 规则检查</span><i aria-hidden="true">→</i>
+                  <span data-flow="approve">3 人工确认</span><i aria-hidden="true">→</i>
+                  <span data-flow="publish">4 前往待发布</span>
+                </div>
+
+                <form id="editor-form">
+                  <div class="field-title-wrap">
+                    <label class="sr-only" for="editor-title">内容标题</label>
+                    <input id="editor-title" name="title" required maxlength="200" placeholder="内容标题...">
+                  </div>
+                  <div class="field-body-wrap">
+                    <div class="body-toolbar">
+                      <span class="body-label">正文草稿</span>
+                      <span id="body-count" class="word-count-pill count-short">0 字符</span>
+                    </div>
+                    <textarea id="editor-body" name="body" required rows="14" maxlength="20000" placeholder="点击「AI 资料起草」或「生成模板草稿」开始写作..."></textarea>
+                  </div>
+
+                  <div class="editor-buttons">
+                    <button class="btn btn-primary" id="save-draft" type="submit">保存修改</button>
+                    <button class="btn btn-secondary" id="ai-draft" type="button" disabled aria-describedby="ai-draft-hint">
+                      <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> AI 资料起草
+                    </button>
+                    <button class="btn btn-secondary" id="generate-draft" type="button">
+                      <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> <span>生成模板草稿</span>
+                    </button>
+                    <button class="btn btn-secondary" id="copy-draft-btn" type="button">
+                      一键复制正文
+                    </button>
+                    <button class="btn btn-secondary" id="preview-card-btn" type="button" title="一键生成小红书 3:4 比例图文卡片并下载图片">
+                      生成图文卡片
+                    </button>
+                    <button class="btn btn-quiet" id="export-draft" type="button">
+                      <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> <span>导出 TXT</span>
+                    </button>
+                    <button class="btn btn-quiet" id="archive-draft-btn" type="button" title="移入归档，从主队列隐去并释放本周工时预算">
+                      <span>移入归档</span>
+                    </button>
+                  </div>
+                </form>
+
+                <p class="form-error" id="editor-error" role="alert" hidden></p>
+                <p class="tiny muted" id="editor-help">修改标题或正文后，已有检查与人工确认会失效，需要重新检查。</p>
+                <p class="tiny muted draft-note" id="ai-draft-hint">AI 草稿连接状态读取中。</p>
+                <a href="/connect.html" class="text-button" id="editor-connect" data-connect hidden>前往配置 AI 草稿连接 →</a>
+
+                <section id="editor-ai" class="ai-details" aria-label="AI 草稿来源与工具摘要" hidden></section>
+
+                <section class="source-references-section" aria-labelledby="references-title">
+                  <div class="section-heading">
+                    <h3 id="references-title">
+                      <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>
+                      <span>本文引用资料 (<span id="reference-count">0</span>)</span>
+                    </h3>
+                    <button class="text-button" type="button" data-go="sources">
+                      前往知识库管理全部参考资料 <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+                  <div id="editor-sources" class="editor-sources-preview"></div>
+                </section>
+
+                <section class="review-section" aria-labelledby="review-title">
+                  <div class="section-heading">
+                    <h3 id="review-title"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> 发布前规则检查</h3>
+                    <button class="btn btn-small btn-secondary" id="review-draft" type="button">运行规则检查</button>
+                  </div>
+                  <p class="tiny muted">程序检查内置规则（标题、字数、敏感承诺等），不替代人工事实判断。</p>
+                  <div id="review-results"></div>
+                  <form id="approve-form">
+                    <label class="checkbox-field">
+                      <input type="checkbox" id="human-confirm">
+                      <span>我已人工核实当前版本的内容及引用资料，尤其是检查提醒项。</span>
+                    </label>
+                    <button class="btn btn-secondary" id="approve-draft" type="submit">人工确认可发布</button>
+                    <p class="tiny muted" id="approve-hint"></p>
+                  </form>
+                </section>
+
+                <!-- 待发布引导区：人工确认后引导前往「待发布」专页 -->
+                <section class="publish-section" id="studio-publish-section" aria-label="待发布引导">
+                  <div class="publish-approved-banner" id="studio-approved-banner" hidden>
+                    <div>
+                      <strong>已人工确认，进入待发布阶段！</strong>
+                      <p class="tiny muted">请前往「待发布」专页一键复制正文发帖，并在发布后登记网址进入数据复盘。</p>
+                    </div>
+                    <button class="btn btn-small btn-primary" type="button" data-go="publish">
+                      前往「待发布」专页 →
+                    </button>
+                  </div>
+                  <div id="published-info" hidden></div>
+                </section>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- 待发布：全新一级页面（汇总待发布卡片、一键复制发帖与手动登记发布链接） -->
+        <section id="page-publish" class="page" hidden aria-labelledby="publish-page-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">确认无误，整装待发</p>
+              <h1 id="publish-page-title" tabindex="-1">待发布<span class="heading-dot">。</span></h1>
+              <p class="page-subtitle">已通过人工审核确认的内容汇聚在此。可一键复制正文前往小红书等平台发帖，并在下方登记发布网址。</p>
+            </div>
+            <span class="page-chip" id="publish-count-chip">0 篇待发布</span>
+          </div>
+
+          <div class="publish-layout">
+            <!-- 待发布队列面板（采用任务队列排版风格） -->
+            <section class="panel publish-queue-panel" aria-labelledby="publish-queue-heading">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="publish-queue-heading">待发布队列</h2>
+                  <p class="muted tiny">已通过内置规则检查与人工把关，随时可复制正文前往各平台发布；发布后登记网址进入复盘观察期</p>
+                </div>
+              </div>
+              <div id="publish-pending-list" class="content-list content-list-spacious" aria-label="待发布内容队列"></div>
+            </section>
+
+            <!-- 已登记发布记录面板 -->
+            <section class="panel publish-history-panel" aria-labelledby="publish-history-heading">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="publish-history-heading">已登记发布内容</h2>
+                  <p class="muted tiny">已填写发布链接，已进入数据复盘观察期</p>
+                </div>
+                <button class="text-button" type="button" data-go="report">
+                  前往「数据复盘」录入运营指标 <span aria-hidden="true">→</span>
+                </button>
+              </div>
+              <div id="publish-history-list" class="publish-history-list"></div>
+            </section>
           </div>
         </section>
 
@@ -469,7 +542,7 @@
                 <span class="popover-hint">只读、不调用模型；30 秒后需重新检查。</span>
               </div>
               <div class="popover-notes">
-                <p>💡 可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
+                <p>提示：可尝试仅代表本机保护允许，不保证网络、密钥当前有效或远端余额；不影响查看已有稿件及编辑未发布稿件。</p>
                 <p id="scope-notice-text">计划为 5 个内置模板，检查为程序规则，复盘为手工指标报告；不爬取、不接平台账号、不自动发布。</p>
               </div>
               <div class="popover-footer">
@@ -495,6 +568,120 @@
         </a>
       </div>
     </footer>
+  </div>
+
+  <!-- 小红书 3:4 图文卡片生成器 Modal -->
+  <div id="card-generator-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="card-gen-title">
+    <div class="card-generator-box">
+      <div class="card-generator-header">
+        <div class="card-gen-header-title">
+          <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>
+          <h2 id="card-gen-title">小红书 3:4 图文卡片排版生成器</h2>
+          <span class="mini-tag">高清 1080×1440 导出</span>
+        </div>
+        <button class="modal-close" id="card-gen-close" type="button" aria-label="关闭">✕</button>
+      </div>
+
+      <div class="card-generator-body">
+        <!-- Left: Realtime Live Card Preview (3:4 ratio) -->
+        <div class="card-preview-container">
+          <div id="card-preview-viewport" class="card-preview-viewport theme-warm">
+            <div class="card-title-area">
+              <span class="card-question-tag" id="card-tag-text">「 岁时生活问答 」</span>
+              <h1 id="card-title-text" class="card-question-title">重阳为何在秋末？</h1>
+              <p id="card-angle-text" class="card-angle-text">比起玄虚传说，更像顺着物候的收束与安顿</p>
+            </div>
+            <div class="card-content-area" id="card-content-body">
+              <!-- Content points or quotes -->
+            </div>
+            <div class="card-footer-area" id="card-footer-area">
+              <div class="card-swipe-hint" id="card-swipe-hint">下滑查看笔记完整拆解 ▾</div>
+              <div class="card-source-tag" id="card-source-tag">依据：经人工核实资料</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Controls & Actions -->
+        <div class="card-generator-controls">
+          <div class="control-group">
+            <label class="control-label">选择视觉主题风格：</label>
+            <div class="theme-options" id="card-theme-options">
+              <button class="theme-btn active" type="button" data-theme="theme-warm">
+                <span class="theme-swatch" style="background:#f8f5ed; border:1.5px solid #dcd1be;"></span>
+                <span>温润东方 (纸质米黄)</span>
+              </button>
+              <button class="theme-btn" type="button" data-theme="theme-sage">
+                <span class="theme-swatch" style="background:#f0f5eb; border:1.5px solid #bdd0b3;"></span>
+                <span>极简青竹 (清新草木)</span>
+              </button>
+              <button class="theme-btn" type="button" data-theme="theme-terracotta">
+                <span class="theme-swatch" style="background:#fdf5f0; border:1.5px solid #e2beaf;"></span>
+                <span>赭石秋序 (温暖日落)</span>
+              </button>
+              <button class="theme-btn" type="button" data-theme="theme-dark">
+                <span class="theme-swatch" style="background:#1c201c; border:1.5px solid #4a544a;"></span>
+                <span>深夜墨静 (静思黑金)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="card-extract-mode">卡片排版模式：</label>
+            <select id="card-extract-mode" class="field-select">
+              <option value="question" selected>痛点疑问封面模式（推荐封面）</option>
+              <option value="zen_quote">极简单问日签模式（意境留白）</option>
+              <option value="summary">极简短词提纲模式（短小线索）</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <label class="control-label" for="card-custom-question">卡片疑问主标题：</label>
+              <button class="text-button" id="card-regen-question-btn" type="button" style="font-size:11px;">重新提取</button>
+            </div>
+            <input id="card-custom-question" class="field" style="width:100%; box-sizing:border-box;" placeholder="例如：重阳秋茶，为何比玄虚传说更能安顿身心？">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="card-custom-sub">副标题 / 思考小引：</label>
+            <input id="card-custom-sub" class="field" style="width:100%; box-sizing:border-box;" placeholder="例如：比起仪式赶场，更像顺着物候的收束与安顿">
+          </div>
+
+          <div class="control-group" id="card-custom-point-group">
+            <label class="control-label" for="card-custom-point">核心疑问句（单句吸睛，无需前缀符号）：</label>
+            <input id="card-custom-point" class="field" style="width:100%; box-sizing:border-box;" placeholder="例如：时令温茶，为何一盅微暖胜过过量滋补？">
+          </div>
+
+          <div class="control-group" id="card-tags-group">
+            <div class="control-label-row">
+              <label class="control-label">推荐发布热门话题：</label>
+              <button class="text-button" id="card-copy-tags-btn" type="button" style="font-size:11px;">复制全部话题</button>
+            </div>
+            <div id="card-tags-container" class="topic-tags-pills">
+              <!-- Dynamically generated hashtag chips -->
+            </div>
+          </div>
+
+          <div class="card-tips-box">
+            <p><strong>多平台图文发布建议（小红书 / 抖音图文 / YouTube）：</strong></p>
+            <ul>
+              <li><strong>3:4 竖屏高清</strong>是小红书与抖音图文的双列黄金比例，亦适配 YouTube 社区动态；</li>
+              <li>封面单句核心反问引发好奇，留白舒展，配合下方推荐话题标签提升分发权重。</li>
+            </ul>
+          </div>
+
+          <div class="card-gen-actions">
+            <button class="btn btn-primary full-width" id="download-card-png-btn" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+              <span>下载 3:4 高清图文卡片 (PNG)</span>
+            </button>
+            <button class="btn btn-secondary full-width" id="copy-text-from-modal-btn" type="button">
+              一键复制文案与话题 (发帖直接粘贴)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
